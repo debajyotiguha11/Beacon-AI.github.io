@@ -168,22 +168,20 @@ export const AwardCreationForm: React.FC<AwardCreationFormProps> = ({ awardDetai
                 <FormSection title="Award Terms" isComplete={isStep3Complete} isActive={activeSection === 'terms'}>
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <SelectField label="Award Type" name="awardType" value={awardDetails.awardType} onChange={handleChange} disabled={activeSection !== 'terms'}>
-                            <option value="">Select...</option><option>Initial</option><option>Renewal</option><option>Expansion</option>
+                            <option value="">Select...</option><option>Standard</option><option>Upstream</option><option>Volume</option>
                         </SelectField>
                          <SelectField label="Freight Terms" name="freightTerms" value={awardDetails.freightTerms} onChange={handleChange} disabled={activeSection !== 'terms'}>
-                            <option value="">Select...</option><option>FOB Origin</option><option>FOB Destination</option><option>Prepaid</option><option>Collect</option>
+                            <option value="">Select...</option><option>Collect</option><option>Prepaid</option><option>DI</option>
                         </SelectField>
                         <SelectField label="Award Length" name="awardLength" value={awardDetails.awardLength} onChange={handleChange} disabled={activeSection !== 'terms'}>
                              <option value="">Select...</option><option>&lt; 1 year</option><option>Multi Year</option><option>Forward Buy</option><option>Annual</option>
                         </SelectField>
-                         <SelectField label="Cost Index" name="costIndex" value={awardDetails.costIndex} onChange={handleChange} disabled={activeSection !== 'terms'}>
-                             <option value="">Select...</option><option>CPI</option><option>Commodity Index</option><option>None</option>
-                        </SelectField>
+                        <InputField label="Cost Index" name="costIndex" value={awardDetails.costIndex} onChange={handleChange} disabled={activeSection !== 'terms'} />
                          <SelectField label="Pricing Method" name="pricingMethod" value={awardDetails.pricingMethod} onChange={handleChange} disabled={activeSection !== 'terms'}>
                              <option value="">Select...</option><option>Fixed</option><option>Fluctuating</option>
                         </SelectField>
                     </div>
-                    {activeSection === 'terms' && <SubmitButton onClick={() => onFormSubmit(`Type: ${awardDetails.awardType}, Freight: ${awardDetails.freightTerms}, Length: ${awardDetails.awardLength}, Index: ${awardDetails.costIndex}, Pricing: ${awardDetails.pricingMethod}`)} disabled={!isStep3Complete} />}
+                    {activeSection === 'terms' && <SubmitButton onClick={() => onFormSubmit(`Type: ${awardDetails.awardType}, Freight: ${awardDetails.freightTerms}, Length: ${awardDetails.awardLength}, Index: ${awardDetails.costIndex || ''}, Pricing: ${awardDetails.pricingMethod}`)} disabled={!isStep3Complete} />}
                 </FormSection>
                 
                 <FormSection title="Clauses" isComplete={isStep4Complete} isActive={activeSection === 'clauses'}>

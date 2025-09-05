@@ -20,7 +20,7 @@ export const AwardFlowProgressBar: React.FC<AwardFlowProgressBarProps> = ({ curr
             [ContextView.AWARD_SUMMARY]: 1,
             [ContextView.AWARD_PDF_GENERATION]: 2,
             [ContextView.AWARD_SENDING_APPROVAL]: 3,
-            [ContextView.AWARD_SUPPLIER_VIEW]: 3,
+            [ContextView.AWARD_SUPPLIER_VIEW]: 4,
             [ContextView.AWARD_FINAL_STATUS]: 4,
         };
         const activeIndex = viewToStep[currentView] ?? -1;

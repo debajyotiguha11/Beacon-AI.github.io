@@ -351,7 +351,7 @@ export const CONVERSATION_SCRIPT: ConversationStep[] = [
   {
       speaker: UserType.AGENT,
       text: "Perfect. Now, let's set the terms. What are the Award Type, Freight Terms, Award Length, Cost Index, and Pricing Method?",
-      options: ["Type: Initial, Freight: FOB Origin, Length: Annual, Index: None, Pricing: Fixed"],
+      options: ["Type: Standard, Freight: Collect, Length: Annual, Index: , Pricing: Fixed"],
       thinkingTime: 800,
       formSection: 'terms',
   },

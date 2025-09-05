@@ -7,6 +7,19 @@ import { CONVERSATION_SCRIPT, QUALIFIED_SUPPLIERS } from './constants';
 import { Message, UserType, ContextView, ConversationStep, AwardDetails } from './types';
 import { AwardPDFCreationAnimation } from './components/AwardPDFCreationAnimation';
 import { SendingForApprovalAnimation } from './components/SendingForApprovalAnimation';
+import { ResizableHandle } from './components/ResizableHandle';
+
+const getInitialPanelWidth = (view: ContextView) => {
+  const isAwardFlow = [
+      ContextView.AWARD_CREATION,
+      ContextView.AWARD_SUMMARY,
+      ContextView.AWARD_PDF_GENERATION,
+      ContextView.AWARD_SENDING_APPROVAL,
+      ContextView.AWARD_SUPPLIER_VIEW,
+      ContextView.AWARD_FINAL_STATUS
+  ].includes(view);
+  return isAwardFlow ? 50 : 60; // 50% for award flow, 60% (3/5) for others
+};
 
 const App: React.FC = () => {
   const [messagesByTab, setMessagesByTab] = useState<Record<string, Message[]>>({ 'Beacon AI': [] });
@@ -28,6 +41,10 @@ const App: React.FC = () => {
   const [awardDetails, setAwardDetails] = useState<AwardDetails>({});
   const [supplierResponse, setSupplierResponse] = useState<'Accept' | 'Reject' | null>(null);
 
+  const [panelWidth, setPanelWidth] = useState(getInitialPanelWidth(contextView));
+  const mainRef = useRef<HTMLElement>(null);
+  const isResizing = useRef(false);
+
   const imageUploadRef = useRef<HTMLInputElement>(null);
 
   const addMessage = (message: Omit<Message, 'id'>, tab: string) => {
@@ -39,6 +56,12 @@ const App: React.FC = () => {
       };
     });
   };
+  
+  // Effect to adjust panel width when context view changes
+  useEffect(() => {
+    setPanelWidth(getInitialPanelWidth(contextView));
+  }, [contextView]);
+
 
   useEffect(() => {
     let waitingTimerId: ReturnType<typeof setTimeout> | undefined;
@@ -343,7 +366,42 @@ const App: React.FC = () => {
     setCurrentStep(0); 
   };
 
-  const isAwardCreationFlow = contextView === ContextView.AWARD_CREATION;
+  const handleMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    isResizing.current = true;
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+        if (!isResizing.current || !mainRef.current) return;
+
+        const mainRect = mainRef.current.getBoundingClientRect();
+        // Calculate the new width as a percentage of the main container's width
+        const newWidthPercent = ((moveEvent.clientX - mainRect.left) / mainRect.width) * 100;
+        
+        // Define constraints in pixels and convert to percentage
+        const minWidthPx = 400;
+        const minWidthPercent = (minWidthPx / mainRect.width) * 100;
+        const maxWidthPercent = 100 - minWidthPercent;
+
+        // Apply constraints
+        if (newWidthPercent > minWidthPercent && newWidthPercent < maxWidthPercent) {
+            setPanelWidth(newWidthPercent);
+        }
+    };
+
+    const handleMouseUp = () => {
+        isResizing.current = false;
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+        window.removeEventListener('mousemove', handleMouseMove);
+        window.removeEventListener('mouseup', handleMouseUp);
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+};
+
   const activeFormSection = CONVERSATION_SCRIPT[currentStep]?.formSection;
 
   return (
@@ -351,8 +409,8 @@ const App: React.FC = () => {
       <Header onMenuClick={() => setIsNavOpen(!isNavOpen)} />
       <div className="flex flex-1 overflow-hidden">
         <LeftNavBar isOpen={isNavOpen} />
-        <main className={`flex-grow grid grid-cols-1 ${isAwardCreationFlow ? 'md:grid-cols-2' : 'md:grid-cols-5'} gap-6 p-6 overflow-auto`}>
-          <div className={`${isAwardCreationFlow ? 'md:col-span-1' : 'md:col-span-3'} bg-white rounded-2xl shadow-md overflow-hidden flex flex-col`}>
+        <main ref={mainRef} className="flex-grow flex p-6 gap-2.5 overflow-auto">
+          <div style={{ flexBasis: `${panelWidth}%` }} className="flex-shrink-0 bg-white rounded-2xl shadow-md overflow-hidden flex flex-col min-w-0">
             <ContextPanel 
               view={contextView} 
               selectedSuppliers={selectedSuppliers}
@@ -369,7 +427,10 @@ const App: React.FC = () => {
               sendingApprovalStatus={sendingApprovalStatus}
             />
           </div>
-          <div className={`${isAwardCreationFlow ? 'md:col-span-1' : 'md:col-span-2'} bg-white rounded-2xl shadow-md flex flex-col overflow-hidden`}>
+          
+          <ResizableHandle onMouseDown={handleMouseDown} />
+
+          <div className="flex-1 bg-white rounded-2xl shadow-md flex flex-col overflow-hidden min-w-0">
             <ChatPanel
               messages={messagesByTab[activeTab] || []}
               isAgentThinking={isAgentThinking}
