@@ -1,0 +1,5 @@
+{
+  "name": "Sourcing Agent AI Assistant",
+  "description": "A conversational UI that simulates an AI-powered sourcing agent guiding a user through the procurement process, from creating a buy plan to generating a purchase order.",
+  "requestFramePermissions": []
+}
