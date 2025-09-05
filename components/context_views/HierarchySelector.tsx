@@ -14,15 +14,15 @@ const Column: React.FC<{
     onItemClick: (item: HierarchyItem) => void;
     onCheckboxChange: (itemName: string) => void;
     onSelectAll: (items: HierarchyItem[]) => void;
-}> = ({ title, items, selectedPathItem, checkedItems, onItemClick, onCheckboxChange, onSelectAll }) => {
-    if (!items || items.length === 0) return null;
-
+    parentName: string | null;
+}> = ({ title, items, selectedPathItem, checkedItems, onItemClick, onCheckboxChange, onSelectAll, parentName }) => {
+    
     const checkedCount = items.filter(i => checkedItems.has(i.name)).length;
     const allChecked = items.length > 0 && checkedCount === items.length;
 
     return (
-        <div className="flex-1 border-r border-slate-200">
-            <div className="p-2 bg-slate-100 border-b border-slate-200">
+        <div className="flex-1 border-r border-slate-200 flex flex-col min-w-[220px] last:border-r-0">
+            <div className="p-2 bg-slate-100 border-b border-slate-200 flex-shrink-0">
                 <label className="flex items-center text-xs font-bold text-slate-600">
                     <input
                         type="checkbox"
@@ -33,10 +33,17 @@ const Column: React.FC<{
                     {title.replace('{X}', checkedCount.toString()).replace('{Y}', items.length.toString())}
                 </label>
             </div>
-            <ul className="h-full overflow-y-auto">
+            {parentName && (
+                <div className="p-2 border-b border-slate-200 bg-white flex-shrink-0">
+                    <span className="text-xs font-bold text-slate-800">
+                        {parentName.toUpperCase()} ({checkedCount} of {items.length})
+                    </span>
+                </div>
+            )}
+            <ul className="flex-grow overflow-y-auto">
                 {items.map(item => (
                     <li key={item.name}>
-                        <div className={`flex items-center text-sm border-b border-slate-200 ${selectedPathItem === item.name ? 'bg-blue-100' : ''}`}>
+                        <div className={`flex items-center text-sm border-b border-slate-200 ${selectedPathItem === item.name ? 'bg-blue-100' : 'hover:bg-slate-50'}`}>
                             <label className="flex items-center p-2 w-full cursor-pointer">
                                 <input
                                     type="checkbox"
@@ -45,7 +52,7 @@ const Column: React.FC<{
                                     onChange={() => onCheckboxChange(item.name)}
                                 />
                                 <span
-                                    className={`flex-grow text-slate-800 ${selectedPathItem === item.name ? 'font-bold' : ''}`}
+                                    className={`flex-grow text-slate-800 ${selectedPathItem === item.name ? 'font-semibold' : ''}`}
                                     onClick={(e) => {
                                         e.preventDefault();
                                         e.stopPropagation();
@@ -66,10 +73,10 @@ const Column: React.FC<{
 export const HierarchySelector: React.FC<HierarchySelectorProps> = ({ onApply, onCancel }) => {
     const [activeTab, setActiveTab] = useState<keyof typeof hierarchyData>('WM - US');
     const [selectionPath, setSelectionPath] = useState<Record<string, string | null>>({
-        sbu: 'HEALTH AND WELLNESS',
-        dept: 'D38 - PHARMACY RX',
-        group: 'CHRONIC',
-        cat: 'DIABETES MELLITUS',
+        sbu: null,
+        dept: null,
+        group: null,
+        cat: null,
         subCat: null,
     });
     const [checkedItems, setCheckedItems] = useState<Set<string>>(new Set());
@@ -176,7 +183,7 @@ export const HierarchySelector: React.FC<HierarchySelectorProps> = ({ onApply, o
                     </nav>
                 </div>
 
-                <div className="flex-grow flex overflow-hidden">
+                <div className="flex-grow flex overflow-x-auto">
                     <Column
                         title="SBUs ({X} of {Y})"
                         items={currentData.sbus}
@@ -185,8 +192,9 @@ export const HierarchySelector: React.FC<HierarchySelectorProps> = ({ onApply, o
                         onItemClick={(item) => handleItemClick('sbu', item)}
                         onCheckboxChange={handleCheckboxChange}
                         onSelectAll={handleSelectAll}
+                        parentName={null}
                     />
-                    <Column
+                    {selectionPath.sbu && depts.length > 0 && <Column
                         title="Departments ({X} of {Y})"
                         items={depts}
                         selectedPathItem={selectionPath.dept}
@@ -194,8 +202,9 @@ export const HierarchySelector: React.FC<HierarchySelectorProps> = ({ onApply, o
                         onItemClick={(item) => handleItemClick('dept', item)}
                         onCheckboxChange={handleCheckboxChange}
                         onSelectAll={handleSelectAll}
-                    />
-                    <Column
+                        parentName={selectionPath.sbu}
+                    />}
+                    {selectionPath.dept && groups.length > 0 && <Column
                         title="Category Groups ({X} of {Y})"
                         items={groups}
                         selectedPathItem={selectionPath.group}
@@ -203,8 +212,9 @@ export const HierarchySelector: React.FC<HierarchySelectorProps> = ({ onApply, o
                         onItemClick={(item) => handleItemClick('group', item)}
                         onCheckboxChange={handleCheckboxChange}
                         onSelectAll={handleSelectAll}
-                    />
-                    <Column
+                        parentName={selectionPath.dept}
+                    />}
+                    {selectionPath.group && cats.length > 0 && <Column
                         title="Category ({X} of {Y})"
                         items={cats}
                         selectedPathItem={selectionPath.cat}
@@ -212,8 +222,9 @@ export const HierarchySelector: React.FC<HierarchySelectorProps> = ({ onApply, o
                         onItemClick={(item) => handleItemClick('cat', item)}
                         onCheckboxChange={handleCheckboxChange}
                         onSelectAll={handleSelectAll}
-                    />
-                    <Column
+                        parentName={selectionPath.group}
+                    />}
+                    {selectionPath.cat && subCats.length > 0 && <Column
                         title="Sub Category ({X} of {Y})"
                         items={subCats}
                         selectedPathItem={selectionPath.subCat}
@@ -221,7 +232,8 @@ export const HierarchySelector: React.FC<HierarchySelectorProps> = ({ onApply, o
                         onItemClick={(item) => { /* no children */ }}
                         onCheckboxChange={handleCheckboxChange}
                         onSelectAll={handleSelectAll}
-                    />
+                        parentName={selectionPath.cat}
+                    />}
                 </div>
 
                 <div className="flex justify-end items-center p-4 border-t border-slate-200 bg-slate-50">

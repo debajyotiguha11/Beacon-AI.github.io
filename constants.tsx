@@ -3,6 +3,8 @@ import { ConversationStep, UserType, ContextView, Supplier } from './types';
 import { AgentTaskView } from './components/AgentTaskView';
 import { DeepThinkingAnimation } from './components/DeepThinkingAnimation';
 import { VendorDataFetchAnimation } from './components/VendorDataFetchAnimation';
+import { AwardPDFCreationAnimation } from './components/AwardPDFCreationAnimation';
+import { SendingForApprovalAnimation } from './components/SendingForApprovalAnimation';
 
 export const USER_PROFILE_IMAGE_URL = "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80";
 
@@ -365,6 +367,7 @@ export const CONVERSATION_SCRIPT: ConversationStep[] = [
       text: "Finally, let’s add the item lines. You can paste them in CSV format (UPC, Item#, Description, Qty, DC).",
       thinkingTime: 800,
       formSection: 'items',
+      options: ["8829103,1102,Vitamin D3 500ct,10000,DC6092\n8829104,1103,Vitamin C 1000mg,15000,DC6092"],
   },
   {
       speaker: UserType.AGENT,
@@ -381,11 +384,26 @@ export const CONVERSATION_SCRIPT: ConversationStep[] = [
   },
   {
       speaker: UserType.AGENT,
-      text: "✅ Details locked. Generating the award document now.",
+      text: <AwardPDFCreationAnimation />,
       thinkingTime: 1000,
       contextView: ContextView.AWARD_PDF_GENERATION,
-      waitingTime: 3000, // Simulate PDF generation time
-      autoContinue: true,
+      isThinkingMessage: true,
+      awaitsCompletion: true,
+  },
+  {
+      speaker: UserType.AGENT,
+      text: "The award document has been generated. Would you like to send it to the supplier for approval?",
+      thinkingTime: 500,
+      contextView: ContextView.AWARD_PDF_GENERATION,
+      options: ["Yes, send for approval", "No, start over"],
+  },
+  {
+    speaker: UserType.AGENT,
+    text: <SendingForApprovalAnimation />,
+    thinkingTime: 500,
+    contextView: ContextView.AWARD_SENDING_APPROVAL,
+    isThinkingMessage: true,
+    awaitsCompletion: true,
   },
   {
     speaker: UserType.AGENT,

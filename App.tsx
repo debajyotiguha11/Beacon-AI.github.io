@@ -5,6 +5,8 @@ import { ChatPanel } from './components/ChatPanel';
 import { ContextPanel } from './components/ContextPanel';
 import { CONVERSATION_SCRIPT, QUALIFIED_SUPPLIERS } from './constants';
 import { Message, UserType, ContextView, ConversationStep, AwardDetails } from './types';
+import { AwardPDFCreationAnimation } from './components/AwardPDFCreationAnimation';
+import { SendingForApprovalAnimation } from './components/SendingForApprovalAnimation';
 
 const App: React.FC = () => {
   const [messagesByTab, setMessagesByTab] = useState<Record<string, Message[]>>({ 'Beacon AI': [] });
@@ -14,6 +16,9 @@ const App: React.FC = () => {
   const [isAgentThinking, setIsAgentThinking] = useState(false);
   const [isAgentWaiting, setIsAgentWaiting] = useState(false);
   const [isAgentSending, setIsAgentSending] = useState(false);
+  const [isPdfGeneratingAnimationRunning, setIsPdfGeneratingAnimationRunning] = useState(false);
+  const [isSendingApproval, setIsSendingApproval] = useState(false);
+  const [sendingApprovalStatus, setSendingApprovalStatus] = useState('');
   const [contextView, setContextView] = useState<ContextView>(ContextView.INITIAL);
   const [userOptions, setUserOptions] = useState<string[]>([]);
   const [showImageUpload, setShowImageUpload] = useState(false);
@@ -40,6 +45,8 @@ const App: React.FC = () => {
     if (currentStep >= CONVERSATION_SCRIPT.length) return;
 
     const step: ConversationStep = CONVERSATION_SCRIPT[currentStep];
+    const isPdfAnimationStep = React.isValidElement(step.text) && (step.text.type === AwardPDFCreationAnimation);
+    const isSendingAnimationStep = React.isValidElement(step.text) && (step.text.type === SendingForApprovalAnimation);
 
     if (step.speaker === UserType.AGENT) {
       setIsAgentThinking(true);
@@ -50,14 +57,37 @@ const App: React.FC = () => {
       const thinkingTimerId = setTimeout(() => {
         setIsAgentThinking(false);
 
+        if (isPdfAnimationStep) setIsPdfGeneratingAnimationRunning(true);
+        if (isSendingAnimationStep) setIsSendingApproval(true);
+        
         let messageText = step.text;
         if (step.awaitsCompletion && React.isValidElement(step.text)) {
-          messageText = React.cloneElement(step.text as React.ReactElement<any>, {
-            onComplete: () => {
-              const nextStepIndex = currentStep + 1;
-              if (nextStepIndex < CONVERSATION_SCRIPT.length) setCurrentStep(nextStepIndex);
-            },
-          });
+            let onCompleteHandler = () => {
+                const nextStepIndex = currentStep + 1;
+                if (nextStepIndex < CONVERSATION_SCRIPT.length) setCurrentStep(nextStepIndex);
+            };
+            let stepSpecificProps: Record<string, any> = {};
+
+            if (isPdfAnimationStep) {
+                onCompleteHandler = () => {
+                    setIsPdfGeneratingAnimationRunning(false);
+                    const nextStepIndex = currentStep + 1;
+                    if (nextStepIndex < CONVERSATION_SCRIPT.length) setCurrentStep(nextStepIndex);
+                };
+            } else if (isSendingAnimationStep) {
+                onCompleteHandler = () => {
+                    setIsSendingApproval(false);
+                    setSendingApprovalStatus('');
+                    const nextStepIndex = currentStep + 1;
+                    if (nextStepIndex < CONVERSATION_SCRIPT.length) setCurrentStep(nextStepIndex);
+                };
+                stepSpecificProps.onStepChange = setSendingApprovalStatus;
+            }
+            
+            messageText = React.cloneElement(step.text as React.ReactElement<any>, {
+                onComplete: onCompleteHandler,
+                ...stepSpecificProps
+            });
         }
         
         if (step.customAction === 'CREATE_AWARD_TAB') {
@@ -191,6 +221,19 @@ const App: React.FC = () => {
     setUserOptions([]);
     setShowImageUpload(false);
     
+    if (response === 'No, start over') {
+        const awardFlowStartIndex = CONVERSATION_SCRIPT.findIndex(step => 
+            step.speaker === UserType.AGENT &&
+            typeof step.text === 'string' &&
+            step.text.startsWith("Great! Let’s create the award.")
+        );
+        if (awardFlowStartIndex !== -1) {
+            setAwardDetails({}); // Reset award details
+            setCurrentStep(awardFlowStartIndex);
+        }
+        return; 
+    }
+
     if (currentStep === 12 && response === "Yes, send them.") {
         setIsAgentSending(true);
         const newStatuses = { ...supplierStatuses };
@@ -279,6 +322,27 @@ const App: React.FC = () => {
     });
   };
 
+  const handleReturnToDashboard = () => {
+    const awardTabName = awardDetails.brand ? `${awardDetails.brand} Award` : 'New Award';
+    const newTabs = tabs.filter(t => t !== awardTabName);
+    
+    setMessagesByTab(prev => {
+        const newMessages = { ...prev };
+        delete newMessages[awardTabName];
+        newMessages['Beacon AI'] = []; // Reset the main tab
+        return newMessages;
+    });
+    
+    setTabs(newTabs.length > 0 ? newTabs : ['Beacon AI']);
+    setActiveTab('Beacon AI');
+    setContextView(ContextView.INITIAL);
+    setAwardDetails({});
+    setSupplierResponse(null);
+    setSelectedSuppliers(new Set());
+    // Setting step to 0 will re-trigger the initial message via useEffect
+    setCurrentStep(0); 
+  };
+
   const isAwardCreationFlow = contextView === ContextView.AWARD_CREATION;
   const activeFormSection = CONVERSATION_SCRIPT[currentStep]?.formSection;
 
@@ -300,6 +364,9 @@ const App: React.FC = () => {
               onAwardDetailsChange={handleAwardDetailsChange}
               onFormSubmit={handleUserResponse}
               activeFormSection={activeFormSection}
+              isAgentThinking={isAgentThinking || isAgentWaiting || isAgentSending || isPdfGeneratingAnimationRunning || isSendingApproval}
+              onReturnToDashboard={handleReturnToDashboard}
+              sendingApprovalStatus={sendingApprovalStatus}
             />
           </div>
           <div className={`${isAwardCreationFlow ? 'md:col-span-1' : 'md:col-span-2'} bg-white rounded-2xl shadow-md flex flex-col overflow-hidden`}>

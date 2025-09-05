@@ -13,6 +13,8 @@ import { AwardSummary } from './context_views/AwardSummary';
 import { AwardPDFGeneration } from './context_views/AwardPDFGeneration';
 import { AwardSupplierView } from './context_views/AwardSupplierView';
 import { AwardFinalStatus } from './context_views/AwardFinalStatus';
+import { AwardFlowProgressBar } from './AwardFlowProgressBar';
+import { AwardSendingApproval } from './context_views/AwardSendingApproval';
 
 interface ContextPanelProps {
   view: ContextView;
@@ -25,6 +27,9 @@ interface ContextPanelProps {
   onAwardDetailsChange: (updates: Partial<AwardDetails>) => void;
   onFormSubmit: (response: string) => void;
   activeFormSection?: string;
+  isAgentThinking?: boolean;
+  onReturnToDashboard: () => void;
+  sendingApprovalStatus?: string;
 }
 
 const viewMap: Record<ContextView, React.ComponentType<any>> = {
@@ -38,6 +43,7 @@ const viewMap: Record<ContextView, React.ComponentType<any>> = {
   [ContextView.AWARD_CREATION]: AwardCreationForm,
   [ContextView.AWARD_SUMMARY]: AwardSummary,
   [ContextView.AWARD_PDF_GENERATION]: AwardPDFGeneration,
+  [ContextView.AWARD_SENDING_APPROVAL]: AwardSendingApproval,
   [ContextView.AWARD_SUPPLIER_VIEW]: AwardSupplierView,
   [ContextView.AWARD_FINAL_STATUS]: AwardFinalStatus,
 };
@@ -52,9 +58,21 @@ export const ContextPanel: React.FC<ContextPanelProps> = ({
   supplierResponse,
   onAwardDetailsChange,
   onFormSubmit,
-  activeFormSection
+  activeFormSection,
+  isAgentThinking,
+  onReturnToDashboard,
+  sendingApprovalStatus,
 }) => {
   const CurrentView = viewMap[view] || InitialView;
+
+  const showProgressBar = [
+    ContextView.AWARD_CREATION,
+    ContextView.AWARD_SUMMARY,
+    ContextView.AWARD_PDF_GENERATION,
+    ContextView.AWARD_SENDING_APPROVAL,
+    ContextView.AWARD_SUPPLIER_VIEW,
+    ContextView.AWARD_FINAL_STATUS,
+  ].includes(view);
 
   const viewProps: any = {};
   if (view === ContextView.INITIAL) {
@@ -65,11 +83,9 @@ export const ContextPanel: React.FC<ContextPanelProps> = ({
     viewProps.onToggleSupplier = onToggleSupplier;
   } else if (view === ContextView.SUPPLIER_DASHBOARD) {
     viewProps.allSuppliers = QUALIFIED_SUPPLIERS;
-    // FIX: Use the 'selectedSuppliers' prop, as 'shortlistedSuppliers' is not defined.
     viewProps.shortlistedSuppliers = selectedSuppliers;
     viewProps.supplierStatuses = supplierStatuses;
   } else if (view === ContextView.SUPPLIER_COMPARISON) {
-    // FIX: Use the 'selectedSuppliers' prop, as 'shortlistedSuppliers' is not defined.
     viewProps.shortlistedSuppliers = selectedSuppliers;
   } else if (view === ContextView.AWARD_CREATION) {
     viewProps.awardDetails = awardDetails;
@@ -78,17 +94,25 @@ export const ContextPanel: React.FC<ContextPanelProps> = ({
     viewProps.activeSection = activeFormSection;
   } else if (view === ContextView.AWARD_SUMMARY) {
     viewProps.awardDetails = awardDetails;
+  } else if (view === ContextView.AWARD_PDF_GENERATION) {
+    viewProps.isGenerating = isAgentThinking;
+  } else if (view === ContextView.AWARD_SENDING_APPROVAL) {
+    viewProps.statusText = sendingApprovalStatus;
   } else if (view === ContextView.AWARD_SUPPLIER_VIEW) {
     viewProps.awardDetails = awardDetails;
     viewProps.onSupplierResponse = onSupplierResponse;
   } else if (view === ContextView.AWARD_FINAL_STATUS) {
     viewProps.supplierResponse = supplierResponse;
+    viewProps.onReturnToDashboard = onReturnToDashboard;
   }
 
 
   return (
-    <div className="h-full overflow-y-auto">
+    <div className="h-full flex flex-col">
+      {showProgressBar && <AwardFlowProgressBar currentView={view} supplierResponse={supplierResponse} />}
+      <div className="flex-grow overflow-y-auto">
         <CurrentView {...viewProps} />
+      </div>
     </div>
   );
 };

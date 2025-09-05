@@ -2,6 +2,7 @@ import React from 'react';
 
 interface AwardFinalStatusProps {
     supplierResponse: 'Accept' | 'Reject' | null;
+    onReturnToDashboard: () => void;
 }
 
 const PanelHeader: React.FC<{ title: string, subtitle: string }> = ({ title, subtitle }) => (
@@ -11,55 +12,37 @@ const PanelHeader: React.FC<{ title: string, subtitle: string }> = ({ title, sub
     </div>
 );
 
-const PipelineStep: React.FC<{
-    isComplete: boolean;
-    isLast?: boolean;
-    statusColor: string;
-    children: React.ReactNode;
-}> = ({ isComplete, isLast, statusColor, children }) => {
-    const colorClass = `text-${statusColor}-600`;
-    const bgClass = `bg-${statusColor}-100`;
-    const borderClass = `after:border-${statusColor}-200`;
-
-    return (
-        <li className={`flex w-full items-center ${colorClass} ${!isLast ? `after:content-[''] after:w-full after:h-1 after:border-b ${borderClass} after:border-1 after:inline-block` : ''}`}>
-            <span className={`flex items-center justify-center w-10 h-10 ${bgClass} rounded-full lg:h-12 lg:w-12 shrink-0`}>
-                {isComplete && (
-                    <svg className="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z" />
-                    </svg>
-                )}
-            </span>
-        </li>
-    );
-};
-
-
-export const AwardFinalStatus: React.FC<AwardFinalStatusProps> = ({ supplierResponse }) => {
+export const AwardFinalStatus: React.FC<AwardFinalStatusProps> = ({ supplierResponse, onReturnToDashboard }) => {
     const isAccepted = supplierResponse === 'Accept';
-    const statusColor = isAccepted ? 'green' : 'red';
     const finalStatusText = isAccepted ? 'Accepted' : 'Rejected';
+    const bgColor = isAccepted ? 'bg-green-100' : 'bg-red-100';
+    const textColor = isAccepted ? 'text-green-800' : 'text-red-800';
+    const iconColor = isAccepted ? 'text-green-500' : 'text-red-500';
+
+    const icon = isAccepted ? (
+        <svg xmlns="http://www.w3.org/2000/svg" className={`h-12 w-12 ${iconColor}`} viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+        </svg>
+    ) : (
+        <svg xmlns="http://www.w3.org/2000/svg" className={`h-12 w-12 ${iconColor}`} viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+        </svg>
+    );
 
     return (
         <div>
             <PanelHeader title="Award Process Completed" subtitle={`The award has been marked as ${finalStatusText}.`} />
-            <div className="p-6">
-                <div className="flex justify-center my-4">
-                    <ol className="flex items-center w-full max-w-2xl">
-                        <PipelineStep isComplete statusColor="green">Finalization</PipelineStep>
-                        <PipelineStep isComplete statusColor="green">PDF Generation</PipelineStep>
-                        <PipelineStep isComplete statusColor="green">Supplier Comms</PipelineStep>
-                        <PipelineStep isComplete statusColor={statusColor}>Supplier Decision</PipelineStep>
-                        <PipelineStep isComplete statusColor={statusColor} isLast>Outcome Recorded</PipelineStep>
-                    </ol>
-                </div>
-                <div className="flex justify-between mt-2 text-sm font-medium text-slate-600 max-w-2xl mx-auto">
-                    <div className="text-center w-1/5 text-green-700">Finalization</div>
-                    <div className="text-center w-1/5 text-green-700">Generation</div>
-                    <div className="text-center w-1/5 text-green-700">Sent</div>
-                    <div className={`text-center w-1/5 text-${statusColor}-700`}>{finalStatusText}</div>
-                    <div className={`text-center w-1/5 text-${statusColor}-700`}>Recorded</div>
-                </div>
+             <div className="p-8 flex flex-col items-center justify-center text-center">
+                 <div className={`w-24 h-24 rounded-full ${bgColor} flex items-center justify-center`}>
+                     {icon}
+                 </div>
+                 <h3 className="mt-4 text-lg font-semibold text-slate-800">Outcome Recorded</h3>
+                 <p className={`mt-1 text-sm ${textColor}`}>The supplier has <span className="font-semibold">{finalStatusText.toLowerCase()}</span> the award. The process is now complete.</p>
+                 <button 
+                    onClick={onReturnToDashboard}
+                    className="mt-6 px-4 py-2 text-sm font-medium text-white bg-walmart-blue rounded-md shadow-sm hover:bg-walmart-darkblue focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-walmart-blue">
+                     Return to Dashboard
+                 </button>
             </div>
         </div>
     );

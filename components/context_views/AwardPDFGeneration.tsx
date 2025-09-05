@@ -7,32 +7,60 @@ const PanelHeader: React.FC<{ title: string, subtitle: string }> = ({ title, sub
     </div>
 );
 
-export const AwardPDFGeneration: React.FC = () => {
+interface AwardPDFGenerationProps {
+    isGenerating?: boolean;
+}
+
+export const AwardPDFGeneration: React.FC<AwardPDFGenerationProps> = ({ isGenerating }) => {
+    if (isGenerating) {
+        return (
+            <div>
+                <PanelHeader title="Generating Award Document" subtitle="Please wait while the document is being created..." />
+                <div className="p-8 flex flex-col items-center justify-center text-center bg-slate-50 h-full">
+                    <div className="relative">
+                        <svg className="animate-spin h-20 w-20 text-walmart-blue" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <div className="absolute inset-0 flex items-center justify-center">
+                           <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-walmart-blue" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2-2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
+                            </svg>
+                        </div>
+                    </div>
+                    <h3 className="mt-6 text-lg font-semibold text-slate-800">Creating PDF...</h3>
+                    <p className="mt-1 text-sm text-slate-600">This may take a few moments.</p>
+                </div>
+            </div>
+        );
+    }
+    
     return (
         <div>
-            <PanelHeader title="Generating Award Document" subtitle="Please wait while the system processes the request." />
-            <div className="p-6">
-                <div className="flex justify-center">
-                    <ol className="flex items-center w-full max-w-md">
-                        <li className="flex w-full items-center text-green-600 after:content-[''] after:w-full after:h-1 after:border-b after:border-green-200 after:border-1 after:inline-block">
-                            <span className="flex items-center justify-center w-10 h-10 bg-green-100 rounded-full lg:h-12 lg:w-12 shrink-0">
-                                <svg className="w-4 h-4 text-green-600 lg:w-6 lg:h-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 16">
-                                    <path d="M19.5 0H.5A.5.5 0 0 0 0 .5v15a.5.5 0 0 0 .5.5h19a.5.5 0 0 0 .5-.5V.5a.5.5 0 0 0-.5-.5ZM8 12.5a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1ZM8 9.5a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1ZM8 6.5a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1ZM15.5 12.5a.5.5 0 0 1-.5.5h-5a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 .5.5v1ZM15.5 9.5a.5.5 0 0 1-.5.5h-5a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 .5.5v1ZM15.5 6.5a.5.5 0 0 1-.5.5h-5a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 .5.5v1Z"/>
-                                </svg>
-                            </span>
-                        </li>
-                        <li className="flex items-center w-full">
-                            <span className="flex items-center justify-center w-10 h-10 bg-blue-100 rounded-full lg:h-12 lg:w-12 shrink-0">
-                                <svg className="w-4 h-4 text-walmart-blue lg:w-6 lg:h-6 animate-spin" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
-                                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18.5 10.5a8.5 8.5 0 1 1-17 0 8.5 8.5 0 0 1 17 0Z"/>
-                                </svg>
-                            </span>
-                        </li>
-                    </ol>
+            <PanelHeader title="Award Document Generated" subtitle="The award PDF is ready for review before sending." />
+            <div className="p-8 flex flex-col items-center justify-center text-center bg-slate-50 h-full">
+                <div className="w-24 h-24 rounded-full bg-blue-100 flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-walmart-blue" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2-2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
+                    </svg>
                 </div>
-                 <div className="flex justify-center mt-2 text-sm font-medium text-slate-600 max-w-md mx-auto">
-                    <div className="text-center w-full text-green-700">Finalization</div>
-                    <div className="text-center w-full text-walmart-blue">PDF Generation</div>
+                <h3 className="mt-4 text-lg font-semibold text-slate-800">Ready for Review</h3>
+                <p className="mt-1 text-sm text-slate-600">Please respond in the chat to send the document to the supplier for approval.</p>
+                 <div className="mt-6 w-full max-w-sm p-3 border border-slate-200 rounded-lg flex items-center justify-between bg-white">
+                    <div className="flex items-center space-x-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-red-500 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                           <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2-2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
+                        </svg>
+                        <div>
+                            <p className="font-medium text-sm text-slate-800">Award_HealthPlus_Annual.pdf</p>
+                            <p className="text-xs text-slate-500">248 KB</p>
+                        </div>
+                    </div>
+                     <button className="text-slate-400 hover:text-walmart-blue">
+                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+                        </svg>
+                     </button>
                 </div>
             </div>
         </div>
