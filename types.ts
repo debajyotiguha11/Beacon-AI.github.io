@@ -1,4 +1,5 @@
 import React from 'react';
+import type { AwardDetails } from './features/award/awardTypes';
 
 export enum UserType {
   AGENT = 'AGENT',
@@ -23,7 +24,7 @@ export enum ContextView {
   AWARD_CREATION = 'AWARD_CREATION',
   AWARD_SUMMARY = 'AWARD_SUMMARY',
   AWARD_PDF_GENERATION = 'AWARD_PDF_GENERATION',
-  AWARD_SENDING_APPROVAL = 'AWARD_SENDING_APPROVAL',
+  AWARD_SENDING = 'AWARD_SENDING',
   AWARD_SUPPLIER_VIEW = 'AWARD_SUPPLIER_VIEW',
   AWARD_FINAL_STATUS = 'AWARD_FINAL_STATUS',
 }
@@ -35,23 +36,7 @@ export interface Supplier {
   status: string;
 }
 
-export interface AwardDetails {
-  market?: string;
-  hierarchy?: string;
-  vendorNumber?: string;
-  sourcingManager?: string;
-  brand?: string;
-  awardType?: string;
-  freightTerms?: string;
-  awardLength?: string;
-  costIndex?: string;
-  pricingMethod?: string;
-  volumeCommitment?: boolean;
-  rofr?: boolean;
-  autoRenewal?: boolean;
-  items?: { upc: string; itemNumber: string; description: string; quantity: string; dc: string; }[];
-  [key: string]: any; // for easier updates
-}
+export type { AwardDetails };
 
 export interface ConversationStep {
   speaker: UserType;
@@ -64,6 +49,7 @@ export interface ConversationStep {
   autoContinue?: boolean;
   isThinkingMessage?: boolean;
   awaitsCompletion?: boolean;
-  customAction?: 'CREATE_AWARD_TAB';
+  customAction?: 'START_REVIEW_FLOW';
   formSection?: 'initial' | 'hierarchy' | 'terms' | 'clauses' | 'items';
+  simulateSupplierResponse?: boolean;
 }

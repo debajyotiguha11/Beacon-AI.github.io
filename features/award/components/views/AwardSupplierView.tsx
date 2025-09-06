@@ -1,5 +1,5 @@
 import React from 'react';
-import { AwardDetails } from '../../types';
+import { AwardDetails } from '../../awardTypes';
 
 interface AwardSupplierViewProps {
   awardDetails: AwardDetails;

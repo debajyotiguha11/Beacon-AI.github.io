@@ -1,5 +1,5 @@
 import React from 'react';
-import { ContextView } from '../types';
+import { ContextView } from '../../../../types';
 
 interface AwardFlowProgressBarProps {
     currentView: ContextView;

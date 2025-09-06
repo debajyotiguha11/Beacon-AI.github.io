@@ -3,8 +3,8 @@ import { ConversationStep, UserType, ContextView, Supplier } from './types';
 import { AgentTaskView } from './components/AgentTaskView';
 import { DeepThinkingAnimation } from './components/DeepThinkingAnimation';
 import { VendorDataFetchAnimation } from './components/VendorDataFetchAnimation';
-import { AwardPDFCreationAnimation } from './components/AwardPDFCreationAnimation';
-import { SendingForApprovalAnimation } from './components/SendingForApprovalAnimation';
+import { AwardPDFCreationAnimation } from './features/award/components/animations/AwardPDFCreationAnimation';
+import { ReviewAwardAnimation } from './features/award/components/animations/ReviewAwardAnimation';
 
 export const USER_PROFILE_IMAGE_URL = "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80";
 
@@ -66,33 +66,14 @@ export const SUPPLIER_COMPARISON_DATA: Record<string, Record<string, string>> = 
   },
 };
 
-
 export const CONVERSATION_SCRIPT: ConversationStep[] = [
   // Step 0 & 1
   {
     speaker: UserType.AGENT,
-    text: "Hey Jony 👋 welcome back! I see you already received a Buy Plan. Want me to retrive it.",
-    options: ["Hi", "Retrieve it", "Create Award"],
+    text: "Hey Jony 👋 welcome back! I see there are some awards pending for your review . Want to review it now ?",
+    options: ["Retrieve Buy Plan", "Create Award", "Review Award"],
     thinkingTime: 1000,
   },
-  // {
-  //   speaker: UserType.AGENT,
-  //   text: "Found it: STEM Educational Toy Kit. Some details are missing — age range, compliance. Would you like to keep it as is, or upload an image so I can detect more details?",
-  //   options: ["Keep as is."],
-  //   isImageUpload: true,
-  //   thinkingTime: 1400,
-  // },
-  // {
-  //   speaker: UserType.AGENT,
-  //   text: (
-  //       <div>
-  //           <p>From the photo I see about 250 pieces (blocks, gears, wheels, booklet). Looks like ABS plastic, probably for ages 6–12. Compliance info isn’t visible.</p>
-  //           <p className="mt-2 font-medium">Should I fill the form with: ages 6–12, ABS (phthalate- & lead-free), compliance ASTM F963 / EN71 / CPSIA, packaging recyclable box + booklet?</p>
-  //       </div>
-  //   ),
-  //   options: ["Yes, confirm and submit."],
-  //   thinkingTime: 900,
-  // },
   {
     speaker: UserType.AGENT,
     text: "All set ✅. Intake form created and routed to your sourcing associate.",
@@ -399,11 +380,9 @@ export const CONVERSATION_SCRIPT: ConversationStep[] = [
   },
   {
     speaker: UserType.AGENT,
-    text: <SendingForApprovalAnimation />,
-    thinkingTime: 500,
-    contextView: ContextView.AWARD_SENDING_APPROVAL,
-    isThinkingMessage: true,
-    awaitsCompletion: true,
+    text: "Okay, I'm sending the award for approval. This will be sent to the supplier via the collab.",
+    thinkingTime: 3000,
+    autoContinue: true,
   },
   {
     speaker: UserType.AGENT,
@@ -415,6 +394,28 @@ export const CONVERSATION_SCRIPT: ConversationStep[] = [
     ),
     thinkingTime: 1500,
     contextView: ContextView.AWARD_SUPPLIER_VIEW,
-    customAction: 'CREATE_AWARD_TAB',
+    simulateSupplierResponse: true,
   },
+  // START REVIEW AWARD FLOW
+  {
+    speaker: UserType.AGENT,
+    text: null, // This step is now silent and just for navigation
+    customAction: 'START_REVIEW_FLOW',
+    autoContinue: true,
+    thinkingTime: 0,
+  },
+  {
+      speaker: UserType.AGENT,
+      text: <ReviewAwardAnimation />,
+      thinkingTime: 1000,
+      isThinkingMessage: true,
+      awaitsCompletion: true,
+  },
+  {
+      speaker: UserType.AGENT,
+      text: "I've gathered all the details for the 'STEM Educational Toy Kit Award'. The summary is now available on the left for your review.",
+      thinkingTime: 1500,
+      contextView: ContextView.AWARD_SUMMARY,
+      options: ["Confirm and Generate PDF"],
+  }
 ];

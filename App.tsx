@@ -5,18 +5,20 @@ import { ChatPanel } from './components/ChatPanel';
 import { ContextPanel } from './components/ContextPanel';
 import { CONVERSATION_SCRIPT, QUALIFIED_SUPPLIERS } from './constants';
 import { Message, UserType, ContextView, ConversationStep, AwardDetails } from './types';
-import { AwardPDFCreationAnimation } from './components/AwardPDFCreationAnimation';
-import { SendingForApprovalAnimation } from './components/SendingForApprovalAnimation';
 import { ResizableHandle } from './components/ResizableHandle';
+
+import { AwardPDFCreationAnimation } from './features/award/components/animations/AwardPDFCreationAnimation';
+import { ReviewAwardAnimation } from './features/award/components/animations/ReviewAwardAnimation';
+import { REVIEW_AWARD_DETAILS } from './features/award/awardConstants';
 
 const getInitialPanelWidth = (view: ContextView) => {
   const isAwardFlow = [
       ContextView.AWARD_CREATION,
       ContextView.AWARD_SUMMARY,
       ContextView.AWARD_PDF_GENERATION,
-      ContextView.AWARD_SENDING_APPROVAL,
       ContextView.AWARD_SUPPLIER_VIEW,
-      ContextView.AWARD_FINAL_STATUS
+      ContextView.AWARD_FINAL_STATUS,
+      ContextView.AWARD_SENDING,
   ].includes(view);
   return isAwardFlow ? 50 : 60; // 50% for award flow, 60% (3/5) for others
 };
@@ -30,8 +32,6 @@ const App: React.FC = () => {
   const [isAgentWaiting, setIsAgentWaiting] = useState(false);
   const [isAgentSending, setIsAgentSending] = useState(false);
   const [isPdfGeneratingAnimationRunning, setIsPdfGeneratingAnimationRunning] = useState(false);
-  const [isSendingApproval, setIsSendingApproval] = useState(false);
-  const [sendingApprovalStatus, setSendingApprovalStatus] = useState('');
   const [contextView, setContextView] = useState<ContextView>(ContextView.INITIAL);
   const [userOptions, setUserOptions] = useState<string[]>([]);
   const [showImageUpload, setShowImageUpload] = useState(false);
@@ -40,6 +40,7 @@ const App: React.FC = () => {
   const [supplierStatuses, setSupplierStatuses] = useState<Record<string, string>>({});
   const [awardDetails, setAwardDetails] = useState<AwardDetails>({});
   const [supplierResponse, setSupplierResponse] = useState<'Accept' | 'Reject' | null>(null);
+  const [isReviewFlow, setIsReviewFlow] = useState(false);
 
   const [panelWidth, setPanelWidth] = useState(getInitialPanelWidth(contextView));
   const mainRef = useRef<HTMLElement>(null);
@@ -69,7 +70,7 @@ const App: React.FC = () => {
 
     const step: ConversationStep = CONVERSATION_SCRIPT[currentStep];
     const isPdfAnimationStep = React.isValidElement(step.text) && (step.text.type === AwardPDFCreationAnimation);
-    const isSendingAnimationStep = React.isValidElement(step.text) && (step.text.type === SendingForApprovalAnimation);
+    const isReviewAnimationStep = React.isValidElement(step.text) && (step.text.type === ReviewAwardAnimation);
 
     if (step.speaker === UserType.AGENT) {
       setIsAgentThinking(true);
@@ -81,7 +82,6 @@ const App: React.FC = () => {
         setIsAgentThinking(false);
 
         if (isPdfAnimationStep) setIsPdfGeneratingAnimationRunning(true);
-        if (isSendingAnimationStep) setIsSendingApproval(true);
         
         let messageText = step.text;
         if (step.awaitsCompletion && React.isValidElement(step.text)) {
@@ -97,14 +97,8 @@ const App: React.FC = () => {
                     const nextStepIndex = currentStep + 1;
                     if (nextStepIndex < CONVERSATION_SCRIPT.length) setCurrentStep(nextStepIndex);
                 };
-            } else if (isSendingAnimationStep) {
-                onCompleteHandler = () => {
-                    setIsSendingApproval(false);
-                    setSendingApprovalStatus('');
-                    const nextStepIndex = currentStep + 1;
-                    if (nextStepIndex < CONVERSATION_SCRIPT.length) setCurrentStep(nextStepIndex);
-                };
-                stepSpecificProps.onStepChange = setSendingApprovalStatus;
+            } else if (isReviewAnimationStep) {
+                // This and any other future animations would go here
             }
             
             messageText = React.cloneElement(step.text as React.ReactElement<any>, {
@@ -113,33 +107,31 @@ const App: React.FC = () => {
             });
         }
         
-        if (step.customAction === 'CREATE_AWARD_TAB') {
-            const awardName = awardDetails.brand ? `${awardDetails.brand} Award` : 'New Award';
-            if (!tabs.includes(awardName)) {
-                setTabs(prev => [...prev, awardName]);
-                setActiveTab(awardName);
-                addMessage({ user: UserType.AGENT, text: messageText }, awardName);
-            }
-        } else {
-            addMessage({ user: UserType.AGENT, text: messageText, isThinkingMessage: step.isThinkingMessage }, activeTab);
-        }
-
+        if(step.text) addMessage({ user: UserType.AGENT, text: messageText, isThinkingMessage: step.isThinkingMessage }, activeTab);
 
         if (step.contextView) setContextView(step.contextView);
         
-        const hasOptions = (step.options && step.options.length > 0) || step.isImageUpload;
-
         const proceed = () => {
-            if (step.autoContinue && !hasOptions) {
+            if (step.autoContinue && !((step.options && step.options.length > 0) || step.isImageUpload)) {
                 const nextStepIndex = currentStep + 1;
                 if (nextStepIndex < CONVERSATION_SCRIPT.length) setCurrentStep(nextStepIndex);
             } else if (!step.awaitsCompletion) {
-                setUserOptions(step.options || []);
+                let options = step.options || [];
+                if (isReviewFlow && step.contextView === ContextView.AWARD_PDF_GENERATION && options.includes("No, start over")) {
+                    options = options.filter(opt => opt !== "No, start over");
+                }
+                setUserOptions(options);
                 setShowImageUpload(step.isImageUpload || false);
             }
         };
-        
-        if (step.waitingTime) {
+
+        if (step.simulateSupplierResponse) {
+            const delay = 5000;
+            waitingTimerId = setTimeout(() => {
+                const response = 'Accept';
+                handleSupplierResponse(response);
+            }, delay);
+        } else if (step.waitingTime) {
             setIsAgentWaiting(true);
             waitingTimerId = setTimeout(() => {
                 setIsAgentWaiting(false);
@@ -173,7 +165,7 @@ const App: React.FC = () => {
       
       return () => clearTimeout(timer);
     }
-  }, [currentStep, activeTab]);
+  }, [currentStep, activeTab, isReviewFlow]);
 
   useEffect(() => {
     if (contextView === ContextView.SUPPLIER_DASHBOARD) {
@@ -187,6 +179,20 @@ const App: React.FC = () => {
   }, [contextView, selectedSuppliers]);
 
   const handleUserResponse = (response: string) => {
+    if (response === 'Review Award') {
+        addMessage({ user: UserType.USER, text: response }, activeTab);
+        setUserOptions([]);
+        setShowImageUpload(false);
+        setAwardDetails(REVIEW_AWARD_DETAILS); // Pre-populate data
+        setIsReviewFlow(true);
+        setContextView(ContextView.AWARD_CREATION); // Show finalization/loader view
+        const reviewFlowStartIndex = CONVERSATION_SCRIPT.findIndex(step => step.customAction === 'START_REVIEW_FLOW');
+        if (reviewFlowStartIndex !== -1) {
+            setCurrentStep(reviewFlowStartIndex);
+        }
+        return;
+    }
+    
     // Handle starting the award flow directly
     if (response === 'Create Award' || response === '/beacon Create Award') {
       const awardFlowStartIndex = CONVERSATION_SCRIPT.findIndex(step => 
@@ -200,9 +206,23 @@ const App: React.FC = () => {
         setUserOptions([]);
         setShowImageUpload(false);
         setAwardDetails({}); // Reset award details
+        setIsReviewFlow(false);
         setCurrentStep(awardFlowStartIndex);
         return; // Stop further execution
       }
+    }
+
+    if (response === 'Confirm and Generate PDF') {
+        const pdfGenStepIndex = CONVERSATION_SCRIPT.findIndex(step => 
+            React.isValidElement(step.text) && step.text.type === AwardPDFCreationAnimation
+        );
+        if (pdfGenStepIndex !== -1) {
+            addMessage({ user: UserType.USER, text: response }, activeTab);
+            setUserOptions([]);
+            setShowImageUpload(false);
+            setCurrentStep(pdfGenStepIndex);
+            return;
+        }
     }
     
     let userMessage = response;
@@ -244,6 +264,10 @@ const App: React.FC = () => {
     setUserOptions([]);
     setShowImageUpload(false);
     
+    if (response === 'Yes, send for approval') {
+        setContextView(ContextView.AWARD_SENDING);
+    }
+    
     if (response === 'No, start over') {
         const awardFlowStartIndex = CONVERSATION_SCRIPT.findIndex(step => 
             step.speaker === UserType.AGENT &&
@@ -252,6 +276,7 @@ const App: React.FC = () => {
         );
         if (awardFlowStartIndex !== -1) {
             setAwardDetails({}); // Reset award details
+            setContextView(ContextView.AWARD_CREATION); // Immediately switch view to prevent wrong loader
             setCurrentStep(awardFlowStartIndex);
         }
         return; 
@@ -314,7 +339,7 @@ const App: React.FC = () => {
         addMessage({ user: UserType.AGENT, text: (
           <div>
             <p className="font-semibold text-green-700">[System Message]</p>
-            <p>"Thank you. Your acceptance has been recorded. You may download the award PDF for your records.”</p>
+            <p>"Supplier has accepted the award. You may download the award PDF for your records.”</p>
           </div>
         )}, activeTab);
     } else {
@@ -346,22 +371,14 @@ const App: React.FC = () => {
   };
 
   const handleReturnToDashboard = () => {
-    const awardTabName = awardDetails.brand ? `${awardDetails.brand} Award` : 'New Award';
-    const newTabs = tabs.filter(t => t !== awardTabName);
-    
-    setMessagesByTab(prev => {
-        const newMessages = { ...prev };
-        delete newMessages[awardTabName];
-        newMessages['Beacon AI'] = []; // Reset the main tab
-        return newMessages;
-    });
-    
-    setTabs(newTabs.length > 0 ? newTabs : ['Beacon AI']);
+    setMessagesByTab({ 'Beacon AI': [] });
+    setTabs(['Beacon AI']);
     setActiveTab('Beacon AI');
     setContextView(ContextView.INITIAL);
     setAwardDetails({});
     setSupplierResponse(null);
     setSelectedSuppliers(new Set());
+    setIsReviewFlow(false);
     // Setting step to 0 will re-trigger the initial message via useEffect
     setCurrentStep(0); 
   };
@@ -417,14 +434,14 @@ const App: React.FC = () => {
               onToggleSupplier={handleToggleSupplier}
               supplierStatuses={supplierStatuses}
               awardDetails={awardDetails}
-              onSupplierResponse={handleSupplierResponse}
               supplierResponse={supplierResponse}
+              onSupplierResponse={handleSupplierResponse}
               onAwardDetailsChange={handleAwardDetailsChange}
               onFormSubmit={handleUserResponse}
               activeFormSection={activeFormSection}
-              isAgentThinking={isAgentThinking || isAgentWaiting || isAgentSending || isPdfGeneratingAnimationRunning || isSendingApproval}
+              isAgentThinking={isAgentThinking || isAgentWaiting || isAgentSending || isPdfGeneratingAnimationRunning}
               onReturnToDashboard={handleReturnToDashboard}
-              sendingApprovalStatus={sendingApprovalStatus}
+              isReviewFlow={isReviewFlow}
             />
           </div>
           
