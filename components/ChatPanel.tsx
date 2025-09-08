@@ -1,10 +1,12 @@
+
 import React, { useRef, useEffect } from 'react';
-import { Message as MessageType } from '../types';
+import { Message as MessageType, UserType } from '../types';
 import { Message } from './Message';
 import { ThinkingIndicator } from './ThinkingIndicator';
 import { WaitingIndicator } from './WaitingIndicator';
 import { ChatInput } from './ChatInput';
 import { SendingInviteAnimation } from './SendingInviteAnimation';
+import { USER_PROFILES } from '../constants';
 
 interface ChatPanelProps {
   messages: MessageType[];
@@ -15,10 +17,18 @@ interface ChatPanelProps {
   onUserResponse: (option: string) => void;
   showImageUpload: boolean;
   onImageUploadClick: () => void;
-  tabs: string[];
-  activeTab: string;
-  onTabChange: (tab: string) => void;
+  participants: Set<UserType>;
+  contextTitle: string;
+  rfqSupplier: string | null;
+  userProfiles: typeof USER_PROFILES;
 }
+
+const ParticipantAvatar: React.FC<{ children: React.ReactNode; statusColor: string }> = ({ children, statusColor }) => (
+  <div className="relative">
+    {children}
+    <span className={`absolute bottom-0 right-0 block h-2.5 w-2.5 rounded-full ${statusColor} ring-2 ring-white`}></span>
+  </div>
+);
 
 export const ChatPanel: React.FC<ChatPanelProps> = ({ 
   messages, 
@@ -29,9 +39,10 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
   onUserResponse, 
   showImageUpload, 
   onImageUploadClick,
-  tabs,
-  activeTab,
-  onTabChange
+  participants,
+  contextTitle,
+  rfqSupplier,
+  userProfiles,
 }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -46,53 +57,70 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
   return (
     <div className="flex flex-col h-full bg-white">
       {/* Chat Header */}
-      <div className="flex items-center justify-between p-4 border-b border-slate-200 bg-slate-50">
-        <h2 className="text-lg font-semibold text-slate-800">Beacon AI</h2>
-        <div className="relative group">
-          <div className="flex items-center justify-center w-8 h-8 bg-slate-200 rounded-full cursor-pointer">
-            <span className="font-semibold text-slate-600">2</span>
-          </div>
-          <div className="absolute right-0 z-10 w-48 mt-2 p-3 bg-slate-800 text-white text-sm rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
-            <p className="font-semibold border-b border-slate-600 pb-2 mb-2">Participants</p>
-            <ul className="space-y-1.5">
-              <li className="flex items-center">
-                <span className="w-2.5 h-2.5 bg-green-400 rounded-full mr-2.5 border border-slate-500"></span>
-                You
-              </li>
-              <li className="flex items-center">
-                <span className="w-2.5 h-2.5 bg-blue-400 rounded-full mr-2.5 border border-slate-500"></span>
-                Sourcing Agent
-              </li>
-            </ul>
-            <div className="absolute right-3 -top-1.5 w-3 h-3 bg-slate-800 transform rotate-45"></div>
-          </div>
+      <div className="p-4 border-b border-slate-200 bg-slate-50 flex items-center space-x-3">
+        <div className="w-10 h-10 rounded-full bg-walmart-darkblue flex items-center justify-center flex-shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 8V4H8"></path>
+                <rect width="16" height="12" x="4" y="8" rx="2"></rect>
+                <path d="M2 14h2"></path>
+                <path d="M20 14h2"></path>
+                <path d="M15 13v2"></path>
+                <path d="M9 13v2"></path>
+            </svg>
+        </div>
+        <div>
+            <h2 className="text-lg font-semibold text-slate-800">{contextTitle}</h2>
+            <p className="text-sm text-slate-500">Your AI Assistant</p>
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="border-b border-slate-200">
-          <nav className="flex -mb-px px-4 space-x-6" aria-label="Tabs">
-              {tabs.map((tab) => (
-                  <button
-                      key={tab}
-                      onClick={() => onTabChange(tab)}
-                      className={`whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm transition-colors ${
-                          activeTab === tab
-                              ? 'border-walmart-blue text-walmart-blue'
-                              : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
-                      }`}
-                  >
-                      {tab}
-                  </button>
-              ))}
-          </nav>
+
+      {/* Participants Row */}
+      <div className="px-4 py-3 border-b border-slate-200 flex items-center space-x-6">
+        <div className="flex items-center space-x-2">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5 text-slate-500"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <span className="font-semibold text-slate-800 text-sm">Participants</span>
+        </div>
+        <div className="flex items-center space-x-2">
+          {Array.from(participants).map(userType => {
+            const profile = USER_PROFILES[userType];
+            if (userType === UserType.SUPPLIER) {
+                const initial = rfqSupplier ? rfqSupplier.charAt(0) : 'S';
+                return (
+                    <ParticipantAvatar key={userType} statusColor="bg-green-500">
+                        <div title={rfqSupplier || 'Supplier'} className="w-8 h-8 rounded-full bg-slate-500 flex items-center justify-center flex-shrink-0 text-white font-bold text-sm">
+                            {initial}
+                        </div>
+                    </ParticipantAvatar>
+                );
+            }
+            return (
+              <ParticipantAvatar key={userType} statusColor="bg-green-500">
+                {profile.isAgent ? (
+                  <div className="w-8 h-8 rounded-full bg-walmart-darkblue flex items-center justify-center flex-shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M12 8V4H8"></path>
+                        <rect width="16" height="12" x="4" y="8" rx="2"></rect>
+                        <path d="M2 14h2"></path>
+                        <path d="M20 14h2"></path>
+                        <path d="M15 13v2"></path>
+                        <path d="M9 13v2"></path>
+                    </svg>
+                  </div>
+                ) : (
+                  <img className="w-8 h-8 rounded-full" src={profile.imageUrl} alt={`${profile.name}'s profile picture`} />
+                )}
+              </ParticipantAvatar>
+            );
+          })}
+        </div>
       </div>
-      
+
       {/* Chat Body */}
       <div className="flex-grow p-6 overflow-y-auto bg-white">
         <div className="flex flex-col space-y-4">
           {messages.map((msg) => (
-            <Message key={msg.id} user={msg.user} text={msg.text} isThinkingMessage={msg.isThinkingMessage} />
+            <Message key={msg.id} user={msg.user} text={msg.text} isThinkingMessage={msg.isThinkingMessage} rfqSupplier={rfqSupplier} />
           ))}
           {isAgentThinking && <ThinkingIndicator />}
           {isAgentWaiting && <WaitingIndicator />}
@@ -108,6 +136,7 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
         showImageUpload={showImageUpload}
         onImageUploadClick={onImageUploadClick}
         isAgentThinking={isAgentThinking || isAgentWaiting || isAgentSending}
+        userProfiles={userProfiles}
       />
     </div>
   );

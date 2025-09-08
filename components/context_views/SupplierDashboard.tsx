@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Supplier } from '../../types';
 
@@ -21,6 +22,9 @@ const StatusDisplay: React.FC<{ status: string }> = ({ status }) => {
     switch (status) {
         case 'Onboarded':
             colorClasses = 'bg-green-100 text-green-800';
+            break;
+        case 'Agreement Ready':
+            colorClasses = 'bg-purple-100 text-purple-800';
             break;
         case 'Invite Pending':
             colorClasses = 'bg-yellow-100 text-yellow-800';

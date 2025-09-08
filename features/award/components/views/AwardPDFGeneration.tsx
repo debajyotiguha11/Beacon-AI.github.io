@@ -1,4 +1,5 @@
 import React from 'react';
+import { AwardDetails } from '../../../../types';
 
 const PanelHeader: React.FC<{ title: string, subtitle: string }> = ({ title, subtitle }) => (
     <div className="p-6 border-b border-slate-200">
@@ -9,9 +10,14 @@ const PanelHeader: React.FC<{ title: string, subtitle: string }> = ({ title, sub
 
 interface AwardPDFGenerationProps {
     isGenerating?: boolean;
+    awardDetails: AwardDetails;
 }
 
-export const AwardPDFGeneration: React.FC<AwardPDFGenerationProps> = ({ isGenerating }) => {
+export const AwardPDFGeneration: React.FC<AwardPDFGenerationProps> = ({ isGenerating, awardDetails }) => {
+    const pdfFileName = awardDetails.brand
+        ? `${awardDetails.brand.replace(/[\s,.]/g, '_')}_Award_${new Date().getFullYear()}.pdf`
+        : 'Award_Document.pdf';
+
     if (isGenerating) {
         return (
             <div>
@@ -52,7 +58,7 @@ export const AwardPDFGeneration: React.FC<AwardPDFGenerationProps> = ({ isGenera
                            <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2-2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
                         </svg>
                         <div>
-                            <p className="font-medium text-sm text-slate-800">Award_HealthPlus_Annual.pdf</p>
+                            <p className="font-medium text-sm text-slate-800">{pdfFileName}</p>
                             <p className="text-xs text-slate-500">248 KB</p>
                         </div>
                     </div>

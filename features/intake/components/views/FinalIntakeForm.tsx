@@ -1,3 +1,4 @@
+
 import React from 'react';
 
 const PanelHeader: React.FC<{ title: string, subtitle: string, locked?: boolean }> = ({ title, subtitle, locked }) => (
@@ -17,7 +18,7 @@ const PanelHeader: React.FC<{ title: string, subtitle: string, locked?: boolean 
   </div>
 );
 
-const FormField: React.FC<{ label: string, value: string, updated?: boolean }> = ({ label, value, updated }) => (
+const FormField: React.FC<{ label: string, value: string | React.ReactNode, updated?: boolean }> = ({ label, value, updated }) => (
     <div className="py-4 sm:grid sm:grid-cols-3 sm:gap-4">
       <dt className="text-sm font-medium text-slate-500">{label}</dt>
       <dd className={`mt-1 text-sm sm:mt-0 sm:col-span-2 ${updated ? 'text-walmart-blue font-semibold' : 'text-slate-900'}`}>
@@ -33,13 +34,22 @@ export const FinalIntakeForm: React.FC = () => {
       <div className="p-6">
         <dl className="divide-y divide-slate-200">
             <FormField label="Product Name" value="STEM Educational Toy Kit" />
-            <FormField label="Est. Piece Count" value="~250" />
+            <FormField label="Quantity" value="~250,000" />
             <FormField label="Material" value="ABS (phthalate- & lead-free)" />
             <FormField label="Target Age" value="6-12 years" />
             <FormField label="Compliance" value="ASTM F963, EN71, CPSIA" />
             <FormField label="Packaging" value="Recyclable" updated />
-            <FormField label="Quantity" value="1,500 kits" updated />
             <FormField label="Supplier Origin" value="Non-sanctioned only" updated />
+            <FormField 
+              label="Product Image" 
+              value={
+                  <img 
+                      src="https://m.media-amazon.com/images/I/81AVVfnjGEL._SL1500_.jpg" 
+                      alt="STEM Educational Toy Kit" 
+                      className="rounded-lg border border-slate-200 h-32 w-auto object-contain"
+                  />
+              } 
+            />
         </dl>
       </div>
     </div>

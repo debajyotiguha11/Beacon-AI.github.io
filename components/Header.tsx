@@ -46,12 +46,6 @@ export const Header: React.FC<{ onMenuClick: () => void }> = ({ onMenuClick }) =
               </svg>
               <h1 className="text-2xl font-semibold text-white tracking-wide">OneSource</h1>
             </div>
-            <nav className="hidden md:flex items-baseline space-x-2">
-              <NavLink href="#" isActive>Dashboard</NavLink>
-              <NavLink href="#">Suppliers</NavLink>
-              <NavLink href="#">Orders</NavLink>
-              <NavLink href="#">Analytics</NavLink>
-            </nav>
           </div>
           <div className="flex items-center">
             <button className="p-1 rounded-full text-gray-300 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-walmart-darkblue focus:ring-white">

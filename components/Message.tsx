@@ -1,55 +1,81 @@
+
 import React from 'react';
 import { UserType } from '../types';
-import { USER_PROFILE_IMAGE_URL } from '../constants';
+import { USER_PROFILES } from '../constants';
 
 interface MessageProps {
   user: UserType;
   text: React.ReactNode;
   isThinkingMessage?: boolean;
+  rfqSupplier?: string | null;
 }
 
-export const Message: React.FC<MessageProps> = ({ user, text, isThinkingMessage }) => {
+export const Message: React.FC<MessageProps> = ({ user, text, isThinkingMessage, rfqSupplier }) => {
+  const profile = USER_PROFILES[user];
+  const isPrimaryUser = user === UserType.USER;
   const isAgent = user === UserType.AGENT;
+  const isSupplier = user === UserType.SUPPLIER;
   const isThinking = isAgent && isThinkingMessage;
 
+  const alignment = isPrimaryUser ? 'justify-end' : 'justify-start';
+  const bubbleStyles = isPrimaryUser
+      ? 'bg-walmart-blue text-white rounded-br-none'
+      : 'bg-gray-100 text-slate-800 rounded-bl-none';
+  const nameColor = isPrimaryUser ? 'text-blue-200' : 'text-slate-700';
+
+
   return (
-    <div className={`flex items-end gap-3 ${isAgent ? 'justify-start' : 'justify-end'}`}>
-      {isAgent && (
-        <div className="w-8 h-8 rounded-full bg-walmart-darkblue flex items-center justify-center flex-shrink-0">
-          <svg
-            fill="#fbc02d"
-            height="1em"
-            viewBox="0 0 16 16"
-            width="1em"
-            xmlns="http://www.w3.org/2000/svg"
-            aria-hidden="true"
-            role="presentation"
-            className="header_wm-icon__EHukV"
-            style={{ fontSize: "1.5rem", verticalAlign: "-0.25em" }}
-          >
-            <path
-              fillRule="evenodd"
-              d="M7.996 1c-.531 0-.953.297-.953.656l.328 3.664c.031.22.305.39.625.39.328 0 .602-.17.64-.39l.321-3.664c0-.36-.422-.656-.96-.656ZM2.988 4c-.312-.18-.781.04-1.047.5-.273.46-.226.977.094 1.156l3.328 1.555c.211.07.492-.078.657-.36.164-.28.148-.601-.024-.742L2.988 4Zm10.985 1.656c.312-.18.359-.695.093-1.156-.273-.46-.742-.68-1.054-.5l-3.008 2.11c-.172.14-.188.46-.024.742.165.28.446.43.657.359l3.336-1.555Zm-11.938 4.68c-.32.187-.367.703-.094 1.164.266.46.735.68 1.047.5l3.008-2.11c.172-.148.188-.468.024-.75-.165-.28-.446-.43-.657-.35l-3.328 1.546Zm8.602-1.547c-.211-.078-.492.07-.657.352-.164.28-.148.601-.024-.75L13.012 12c.312.18.781-.04 1.054-.5.266-.46.22-.977-.093-1.164l-3.336-1.547Zm-2.633 1.5c-.328 0-.602.164-.633.383l-.328 3.664c0 .367.422.664.953.664.54 0 .961-.297.961-.664l-.32-3.664c-.04-.219-.313-.383-.633-.383Z"
+    <div className={`flex items-end gap-3 ${alignment}`}>
+      {!isPrimaryUser && (
+        <>
+          {isAgent ? (
+            <div className="w-8 h-8 rounded-full bg-walmart-darkblue flex items-center justify-center flex-shrink-0">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 8V4H8"></path>
+                  <rect width="16" height="12" x="4" y="8" rx="2"></rect>
+                  <path d="M2 14h2"></path>
+                  <path d="M20 14h2"></path>
+                  <path d="M15 13v2"></path>
+                  <path d="M9 13v2"></path>
+              </svg>
+            </div>
+          ) : isSupplier ? (
+            <div title={rfqSupplier || 'Supplier'} className="w-8 h-8 rounded-full bg-slate-500 flex items-center justify-center flex-shrink-0 text-white font-bold text-sm">
+                {rfqSupplier ? rfqSupplier.charAt(0) : 'S'}
+            </div>
+          ) : (
+            <img
+              className="w-8 h-8 rounded-full flex-shrink-0"
+              src={profile.imageUrl}
+              alt={`${profile.name}'s profile picture`}
             />
-          </svg>
-        </div>
+          )}
+        </>
       )}
-      <div
-        className={`px-4 py-3 rounded-2xl max-w-lg text-sm ${
-          isAgent
-            ? 'bg-gray-100 text-slate-800 rounded-bl-none'
-            : 'bg-walmart-blue text-white rounded-br-none'
-        } ${
-          isThinking ? 'border border-dashed border-slate-300' : 'shadow-sm'
-        }`}
-      >
-        {text}
+      <div className={`flex flex-col max-w-lg ${isPrimaryUser ? 'items-end' : 'items-start'}`}>
+        <div
+          className={`px-4 py-3 rounded-2xl text-sm ${bubbleStyles} ${
+            isThinking ? 'border border-dashed border-slate-300' : 'shadow-sm'
+          }`}
+        >
+          {!isAgent && !isSupplier && (
+            <div className={`font-semibold mb-1 text-xs ${nameColor}`}>
+              {profile.name}
+            </div>
+          )}
+          {isSupplier && (
+              <div className={`font-semibold mb-1 text-xs ${nameColor}`}>
+                {rfqSupplier || 'Supplier'}
+              </div>
+          )}
+          {text}
+        </div>
       </div>
-      {!isAgent && (
+      {isPrimaryUser && (
         <img
           className="w-8 h-8 rounded-full flex-shrink-0"
-          src={USER_PROFILE_IMAGE_URL}
-          alt="Your profile picture"
+          src={profile.imageUrl}
+          alt={`${profile.name}'s profile picture`}
         />
       )}
     </div>

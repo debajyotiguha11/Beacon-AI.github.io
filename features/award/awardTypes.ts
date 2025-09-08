@@ -1,4 +1,9 @@
+
+
 export interface AwardDetails {
+  awardName?: string;
+  startDate?: string;
+  endDate?: string;
   market?: string;
   hierarchy?: string;
   vendorNumber?: string;
@@ -12,6 +17,6 @@ export interface AwardDetails {
   volumeCommitment?: boolean;
   rofr?: boolean;
   autoRenewal?: boolean;
-  items?: { upc: string; itemNumber: string; description: string; quantity: string; dc: string; }[];
+  items?: { upc: string; itemNumber: string; description: string; quantity: string; dc: string; price?: number; }[];
   [key: string]: any; // for easier updates
 }

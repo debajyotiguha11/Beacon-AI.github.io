@@ -1,3 +1,4 @@
+
 import React from 'react';
 
 const PanelHeader: React.FC<{ title: string, subtitle: string }> = ({ title, subtitle }) => (
@@ -7,7 +8,7 @@ const PanelHeader: React.FC<{ title: string, subtitle: string }> = ({ title, sub
   </div>
 );
 
-const FormField: React.FC<{ label: string, value: string, badge?: string }> = ({ label, value, badge }) => (
+const FormField: React.FC<{ label: string, value: string | React.ReactNode, badge?: string }> = ({ label, value, badge }) => (
     <div className="py-4 sm:grid sm:grid-cols-3 sm:gap-4">
       <dt className="text-sm font-medium text-slate-500">{label}</dt>
       <dd className="mt-1 text-sm text-slate-900 sm:mt-0 sm:col-span-2 flex items-center">
@@ -25,17 +26,23 @@ export const DraftIntakeForm: React.FC = () => {
       <div className="p-6">
         <dl className="divide-y divide-slate-200">
             <FormField label="Product Name" value="STEM Educational Toy Kit" />
-            <FormField label="Est. Piece Count" value="~250" />
+            <FormField label="Quantity" value="~250,000" />
             <FormField label="Material" value="ABS (phthalate- & lead-free)" badge="Detected" />
             <FormField label="Target Age" value="6-12 years" badge="Detected" />
             <FormField label="Compliance" value="ASTM F963, EN71, CPSIA" badge="Inferred" />
             <FormField label="Packaging" value="Recyclable box + booklet" badge="Inferred" />
-            <FormField label="Quantity" value="-" />
             <FormField label="Supplier Origin" value="-" />
+            <FormField 
+              label="Product Image" 
+              value={
+                  <img 
+                      src="https://m.media-amazon.com/images/I/81AVVfnjGEL._SL1500_.jpg" 
+                      alt="STEM Educational Toy Kit" 
+                      className="rounded-lg border border-slate-200 h-32 w-auto object-contain" 
+                  />
+              } 
+            />
         </dl>
-        <div className="mt-6 p-3 bg-yellow-50 border border-yellow-200 rounded-xl text-sm text-yellow-700">
-          Some details are missing. Awaiting clarification from merchant.
-        </div>
       </div>
     </div>
   );

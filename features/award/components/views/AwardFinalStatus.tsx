@@ -37,12 +37,7 @@ export const AwardFinalStatus: React.FC<AwardFinalStatusProps> = ({ supplierResp
                      {icon}
                  </div>
                  <h3 className="mt-4 text-lg font-semibold text-slate-800">Outcome Recorded</h3>
-                 <p className={`mt-1 text-sm ${textColor}`}>The supplier has <span className="font-semibold">{finalStatusText.toLowerCase()}</span> the award. The process is now complete.</p>
-                 <button 
-                    onClick={onReturnToDashboard}
-                    className="mt-6 px-4 py-2 text-sm font-medium text-white bg-walmart-blue rounded-md shadow-sm hover:bg-walmart-darkblue focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-walmart-blue">
-                     Return to Dashboard
-                 </button>
+                 <p className={`mt-1 text-sm ${textColor}`}>The supplier has <span className="font-semibold">{finalStatusText.toLowerCase()}</span> the award.</p>
             </div>
         </div>
     );

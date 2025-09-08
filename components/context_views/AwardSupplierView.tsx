@@ -13,6 +13,10 @@ const PanelHeader: React.FC<{ title: string, subtitle: string }> = ({ title, sub
 );
 
 export const AwardSupplierView: React.FC<AwardSupplierViewProps> = ({ awardDetails }) => {
+    const pdfFileName = awardDetails.brand
+        ? `${awardDetails.brand.replace(/[\s,.]/g, '_')}_Award_${new Date().getFullYear()}.pdf`
+        : 'Award_Document.pdf';
+
     return (
         <div>
             <PanelHeader title={`Award for ${awardDetails.brand}`} subtitle="Sent for supplier approval" />
@@ -23,7 +27,7 @@ export const AwardSupplierView: React.FC<AwardSupplierViewProps> = ({ awardDetai
                            <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2-2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
                         </svg>
                         <div>
-                            <p className="font-medium text-slate-800">Award_HealthPlus_Annual.pdf</p>
+                            <p className="font-medium text-slate-800">{pdfFileName}</p>
                             <p className="text-xs text-slate-500">248 KB - Final</p>
                         </div>
                     </div>

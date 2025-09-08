@@ -1,21 +1,17 @@
 import React, { useState, useEffect } from 'react';
 
-const THINKING_STEPS = [
-'Getting ready to start your search...',
- 'Making a secure connection...',
- 'Loading sourcing options...',
- 'Reviewing your request details...',
- 'Finding the best matching suppliers...',
- 'Gathering information from multiple sources...',
- 'Bringing everything together...',
- 'Starting supplier search...',
+const PREPARING_STEPS = [
+  'Analyzing response gaps...',
+  'Cross-referencing with compliance checklist...',
+  'Formulating targeted questions...',
+  'Drafting follow-ups for each supplier...',
 ];
 
-export const DeepThinkingAnimation: React.FC<{ onComplete?: () => void }> = ({ onComplete }) => {
+export const PreparingQuestionsAnimation: React.FC<{ onComplete?: () => void }> = ({ onComplete }) => {
   const [currentStep, setCurrentStep] = useState(0);
 
   useEffect(() => {
-    if (currentStep >= THINKING_STEPS.length) {
+    if (currentStep >= PREPARING_STEPS.length) {
       if (onComplete) {
         const timer = setTimeout(onComplete, 500);
         return () => clearTimeout(timer);
@@ -25,16 +21,16 @@ export const DeepThinkingAnimation: React.FC<{ onComplete?: () => void }> = ({ o
 
     const timer = setTimeout(() => {
       setCurrentStep(c => c + 1);
-    }, 600); // Animation speed per step
+    }, 500); // Animation speed per step
 
     return () => clearTimeout(timer);
   }, [currentStep, onComplete]);
 
   return (
     <div>
-      <p className="font-medium mb-3">Preparing search strategy...</p>
+      <p className="font-medium mb-3">Preparing follow-up questions based on current data...</p>
       <div className="space-y-2">
-        {THINKING_STEPS.map((step, index) => (
+        {PREPARING_STEPS.map((step, index) => (
           <div key={index} className="flex items-center text-sm">
             {index < currentStep ? (
               <svg className="w-4 h-4 text-green-500 mr-2 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">

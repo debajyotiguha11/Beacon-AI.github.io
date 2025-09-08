@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Supplier } from '../../types';
 
@@ -15,9 +16,15 @@ const PanelHeader: React.FC<{ title: string, subtitle: string }> = ({ title, sub
 );
 
 export const SupplierShortlist: React.FC<SupplierShortlistProps> = ({ suppliers, selectedSuppliers, onToggleSupplier }) => {
+  const typeClasses: Record<string, string> = {
+    'Walmart Supplier': 'bg-green-100 text-green-800',
+    'Walmart Seller': 'bg-blue-100 text-blue-800',
+    'External': 'bg-yellow-100 text-yellow-800',
+  };
+
   return (
     <div>
-      <PanelHeader title="Qualified Suppliers" subtitle="8 suppliers remaining after filtering." />
+      <PanelHeader title="Qualified Suppliers" subtitle="5 suppliers remaining after filtering." />
       <div className="p-6">
         <ul role="list" className="divide-y divide-slate-200">
           {suppliers.map(supplier => (
@@ -37,9 +44,11 @@ export const SupplierShortlist: React.FC<SupplierShortlistProps> = ({ suppliers,
               </div>
               <div className="flex flex-col items-end">
                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                    supplier.type === 'Internal' ? 'bg-green-100 text-green-800' : 'bg-slate-100 text-slate-800'
+                    typeClasses[supplier.type] || 'bg-slate-100 text-slate-800'
                 }`}>{supplier.type}</span>
-                <p className="text-sm text-slate-500 mt-1">Score: {supplier.score}</p>
+                {supplier.type !== 'External' && (
+                  <p className="text-sm text-slate-500 mt-1">Score: {supplier.score}</p>
+                )}
               </div>
             </li>
           ))}

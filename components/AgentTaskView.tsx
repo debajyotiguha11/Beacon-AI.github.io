@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 
 const tasks = [
-    { text: 'Searching internal supplier database', icon: 'database' },
-    { text: 'Running semantic match for product specs', icon: 'brain' },
-    { text: 'Performing image similarity search', icon: 'image' },
-    { text: 'Querying external marketplaces', icon: 'globe' },
-    { text: 'Applying sourcing constraints & filters', icon: 'filter' },
+    { text: 'Checking our supplier database...', icon: 'database' },
+    { text: 'Matching product details with suppliers...', icon: 'brain' },
+    { text: 'Looking at similar products and images...', icon: 'image' },
+    { text: 'Exploring external marketplaces...', icon: 'globe' },
+    { text: 'Applying filters to match your needs...', icon: 'filter' },
 ];
 
 const icons: Record<string, React.ReactNode> = {

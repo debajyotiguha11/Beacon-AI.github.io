@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { ConversationStep, UserType, ContextView, Supplier } from './types';
 import { AgentTaskView } from './components/AgentTaskView';
@@ -5,64 +6,119 @@ import { DeepThinkingAnimation } from './components/DeepThinkingAnimation';
 import { VendorDataFetchAnimation } from './components/VendorDataFetchAnimation';
 import { AwardPDFCreationAnimation } from './features/award/components/animations/AwardPDFCreationAnimation';
 import { ReviewAwardAnimation } from './features/award/components/animations/ReviewAwardAnimation';
+import { AddingParticipantAnimation } from './components/AddingParticipantAnimation';
+import { PreparingQuestionsAnimation } from './components/PreparingQuestionsAnimation';
+import { SendingRFQAnimation } from './components/SendingRFQAnimation';
+import { SendingAgreementAnimation } from './components/SendingAgreementAnimation';
 
 export const USER_PROFILE_IMAGE_URL = "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80";
+export const AMBER_PROFILE_IMAGE_URL = "https://images.unsplash.com/photo-1520813792240-56fc4a3765a7?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80";
+
+export const USER_PROFILES: Record<UserType, { name: string, imageUrl: string, isAgent?: boolean }> = {
+    [UserType.AGENT]: { name: 'Agent : Beacon', imageUrl: '', isAgent: true },
+    [UserType.USER]: { name: 'Associate : Jony', imageUrl: USER_PROFILE_IMAGE_URL },
+    [UserType.AMBER]: { name: 'Merchant : Amber', imageUrl: AMBER_PROFILE_IMAGE_URL },
+    [UserType.SUPPLIER]: { name: 'Supplier', imageUrl: '' },
+};
+
 
 export const QUALIFIED_SUPPLIERS: Supplier[] = [
-    { name: "Maitri", type: "Internal", score: 92, status: "Onboarded" },
-    { name: "Nestle", type: "New", score: 88, status: "Requires Onboarding" },
-    { name: "Cadbury", type: "New", score: 85, status: "Requires Onboarding" },
-    { name: "Supplier D", type: "Marketplace", score: 81, status: "Requires Onboarding" },
-    { name: "Supplier E", type: "Internal", score: 79, status: "Onboarded" },
-    { name: "Supplier F", type: "Marketplace", score: 75, status: "Requires Onboarding" },
-    { name: "Supplier G", type: "Semantic", score: 74, status: "Requires Onboarding" },
-    { name: "Supplier H", type: "Image Match", score: 70, status: "Requires Onboarding" },
+    { name: "ToyCrafters Inc.", type: "Walmart Supplier", score: 92, status: "Onboarded" },
+    { name: "EduPlay Co.", type: "Walmart Supplier", score: 85, status: "Onboarded" },
+    { name: "Innovate & Educate", type: "Walmart Seller", score: 88, status: "Onboarded" },
+    { name: "Gizmo Gurus", type: "External", score: 75, status: "Requires Onboarding" },
+    { name: "Brainy Builder Toys Pvt. Ltds", type: "External", score: 82, status: "Requires Onboarding" },
 ];
 
-export const COMPARISON_FEATURES = [
-  'Price/Unit',
-  'Price @ 5k+',
-  'Capacity/Month',
-  'Compliance',
-  'Phthalate-Free',
-  'Defect Rate',
-  'Customization',
-  'Logistics',
-  'Audits',
-];
-
-export const SUPPLIER_COMPARISON_DATA: Record<string, Record<string, string>> = {
-  'Maitri': {
-    'Price/Unit': '$8.20', 'Price @ 5k+': '$8.20', 'Capacity/Month': '30k', 'Compliance': 'Verified',
-    'Phthalate-Free': 'Verified', 'Defect Rate': '<2%', 'Customization': 'Limited', 'Logistics': 'FOB HK', 'Audits': 'N/A',
+export const DETAILED_SUPPLIER_INFO: Record<string, any> = {
+  'ToyCrafters Inc.': {
+    tags: ['Walmart Supplier', 'Top Rated'],
+    location: 'Bentonville, AR',
+    serScore: 92,
+    risk: 'Low',
+    companyDetails: {
+      'Supplier #': '73928461',
+      'Annual Sales 2024': '$25.4 million',
+      'Country': 'USA',
+      'Ad Spend': '$1.2 million',
+      'Retail Market': 'United States',
+      'Growth': '8.5%',
+    },
+    productCategories: ['Educational Toys', 'Building Blocks', 'STEM Kits'],
+    businessUnitCoverage: 'Toys (5/5)',
+    value: '$75M+'
   },
-  'Nestle': {
-    'Price/Unit': '$7.90', 'Price @ 5k+': '$7.50', 'Capacity/Month': '20k', 'Compliance': 'Claimed',
-    'Phthalate-Free': 'Verified', 'Defect Rate': '<1%', 'Customization': 'Yes (PMS)', 'Logistics': 'FOB HK', 'Audits': 'N/A',
+  'Innovate & Educate': {
+    name: "Innovate & Educate",
+    tags: ['Walmart Seller', 'Eco-Friendly'],
+    location: 'Shanghai, China',
+    serScore: 88,
+    risk: 'Low',
+    companyDetails: {
+      'Supplier #': '84392817',
+      'Annual Sales 2024': '$18.9 million',
+      'Country': 'China',
+      'Ad Spend': '$850K',
+      'Retail Market': 'Global',
+      'Growth': '12.8%',
+    },
+    productCategories: ['Electronics', 'Mobile Devices', 'Home Appliances'],
+    businessUnitCoverage: 'Electronics (6/6)',
+    value: '$50M+'
   },
-  'Cadbury': {
-    'Price/Unit': 'Pending', 'Price @ 5k+': 'Pending', 'Capacity/Month': '15k', 'Compliance': 'Partial',
-    'Phthalate-Free': 'Pending', 'Defect Rate': 'N/A', 'Customization': 'N/A', 'Logistics': 'FOB Ningbo', 'Audits': 'ISO, SMETA',
+  'Gizmo Gurus': {
+    name: "Gizmo Gurus",
+    tags: ['External', 'New'],
+    location: 'Hong Kong',
+    serScore: 75,
+    risk: 'Medium',
+    companyDetails: {
+      'Supplier #': 'N/A',
+      'Annual Sales 2024': '$7.2 million',
+      'Country': 'Hong Kong',
+      'Ad Spend': '$300K',
+      'Retail Market': 'Asia',
+      'Growth': '15.2%',
+    },
+    productCategories: ['Gadgets', 'Electronic Toys', 'Accessories'],
+    businessUnitCoverage: 'Toys (2/5)',
+    value: '$10M+'
   },
-  'Supplier D': {
-    'Price/Unit': '$8.50', 'Price @ 5k+': '$8.30', 'Capacity/Month': '25k', 'Compliance': 'Verified',
-    'Phthalate-Free': 'Verified', 'Defect Rate': '<1.5%', 'Customization': 'Yes', 'Logistics': 'FOB Shanghai', 'Audits': 'BSCI',
+  'EduPlay Co.': {
+    name: "EduPlay Co.",
+    tags: ['Walmart Supplier'],
+    location: 'San Francisco, CA',
+    serScore: 85,
+    risk: 'Low',
+    companyDetails: {
+      'Supplier #': '28374651',
+      'Annual Sales 2024': '$15.1 million',
+      'Country': 'USA',
+      'Ad Spend': '$950K',
+      'Retail Market': 'United States',
+      'Growth': '9.2%',
+    },
+    productCategories: ['Plush Toys', 'Board Games', 'Art Supplies'],
+    businessUnitCoverage: 'Toys (4/5)',
+    value: '$40M+'
   },
-  'Supplier E': {
-    'Price/Unit': '$9.10', 'Price @ 5k+': '$9.00', 'Capacity/Month': '50k', 'Compliance': 'Verified',
-    'Phthalate-Free': 'Verified', 'Defect Rate': '<2.5%', 'Customization': 'No', 'Logistics': 'FOB HK', 'Audits': 'N/A',
-  },
-  'Supplier F': {
-    'Price/Unit': '$8.00', 'Price @ 5k+': '$7.80', 'Capacity/Month': '18k', 'Compliance': 'Claimed',
-    'Phthalate-Free': 'Pending', 'Defect Rate': '<2%', 'Customization': 'Limited', 'Logistics': 'FOB Shenzhen', 'Audits': 'N/A',
-  },
-  'Supplier G': {
-    'Price/Unit': 'Pending', 'Price @ 5k+': 'Pending', 'Capacity/Month': '16k', 'Compliance': 'Partial',
-    'Phthalate-Free': 'Pending', 'Defect Rate': 'N/A', 'Customization': 'Yes', 'Logistics': 'FOB Qingdao', 'Audits': 'ISO 9001',
-  },
-  'Supplier H': {
-    'Price/Unit': '$9.50', 'Price @ 5k+': '$9.20', 'Capacity/Month': '15k', 'Compliance': 'Claimed',
-    'Phthalate-Free': 'Verified', 'Defect Rate': '<3%', 'Customization': 'No', 'Logistics': 'FOB Guangzhou', 'Audits': 'N/A',
+  'Brainy Builder Toys Pvt. Ltds': {
+    name: "Brainy Builder Toys Pvt. Ltds",
+    tags: ['External', 'Sustainable'],
+    location: 'Toronto, Canada',
+    serScore: 95,
+    risk: 'Strategic',
+    companyDetails: {
+      'Supplier #': 'N/A',
+      'Annual Sales 2024': '$102 million',
+      'Country': 'Canada',
+      'Ad Spend': '$500K',
+      'Retail Market': 'Europe, US',
+      'Growth': '11.3%',
+    },
+    productCategories: ['Wooden Toys', 'Puzzles', 'Educational Kits'],
+    businessUnitCoverage: 'Toys (3/5)',
+    value: '$20M+'
   },
 };
 
@@ -70,8 +126,17 @@ export const CONVERSATION_SCRIPT: ConversationStep[] = [
   // Step 0 & 1
   {
     speaker: UserType.AGENT,
-    text: "Hey Jony 👋 welcome back! I see there are some awards pending for your review . Want to review it now ?",
-    options: ["Retrieve Buy Plan", "Create Award", "Review Award"],
+    text: (
+        <div>
+            <p>Hey Jony 👋 welcome back! You have some pending tasks.</p>
+            <ol className="list-decimal list-inside ml-2 mt-2 space-y-1">
+                <li>Received Buy Plan from Amber</li>
+                <li>Pending Awards Review.</li>
+                <li>Create Purchase Order</li>
+            </ol>
+        </div>
+    ),
+    options: ["Retrieve Buy Plan"],
     thinkingTime: 1000,
   },
   {
@@ -94,45 +159,33 @@ export const CONVERSATION_SCRIPT: ConversationStep[] = [
     options: ["Accept directly", "Ask a few clarifications."],
     thinkingTime: 1000,
   },
-    {
+  // Steps 3, 4, 5: New Clarification Flow (triggered by user message)
+  {
     speaker: UserType.AGENT,
-    text: "You can share the open points which you have. I'll forward the question to merchant.",
+    text: <AddingParticipantAnimation />,
     thinkingTime: 500,
-    contextView: ContextView.DRAFT_INTAKE_FORM
+    isThinkingMessage: true,
+    awaitsCompletion: true,
   },
   {
     speaker: UserType.AGENT,
-    text: (
-      <div>
-        <p className="font-semibold text-slate-600">[Message to Merchant]</p>
-        <p>Could you confirm:</p>
-        <ul className="list-disc list-inside ml-2 mt-1">
-          <li>Do you need explicit phthalate/lead-free declarations?</li>
-          <li>Supplier origin (non-sanctioned only)?</li>
-          <li>Packaging details?</li>
-        </ul>
-      </div>
-    ),
-    thinkingTime: 500,
-    waitingTime: 3000,
+    text: null,
+    waitingTime: 2500,
     autoContinue: true,
   },
   {
-    speaker: UserType.AGENT,
-    text: (
-      <div>
-        <p className="font-semibold text-slate-600">[Merchant Replied]</p>
-        <p>Yes phthalate/lead-free, Non-sanctioned origins, Recyclable packaging.</p>
-      </div>
-    ),
-    autoContinue: true,
+    speaker: UserType.AMBER,
+    text: "Yes phthalate/lead-free, Non-sanctioned origins, Recyclable packaging.",
+    autoContinue: true
   },
+  // Step 6
    {
     speaker: UserType.AGENT,
-    text: "The intake form has been finalized. Do you want me to lock it and move forward?",
+    text: "Do you want me to lock it and move forward?",
     options: ["Yes, lock it."],
     thinkingTime: 1200,
   },
+  // Step 7
   {
     speaker: UserType.AGENT,
     text: "Locked ✅. Intake form finalized. Moving on to supplier search.",
@@ -140,7 +193,7 @@ export const CONVERSATION_SCRIPT: ConversationStep[] = [
     contextView: ContextView.FINAL_INTAKE_FORM,
     autoContinue: true,
   },
-  // Step 3
+  // Step 8
   {
     speaker: UserType.AGENT,
     text: <DeepThinkingAnimation />,
@@ -149,6 +202,7 @@ export const CONVERSATION_SCRIPT: ConversationStep[] = [
     awaitsCompletion: true,
     isThinkingMessage: true,
   },
+  // Step 9
   {
     speaker: UserType.AGENT,
     text: <AgentTaskView />,
@@ -157,147 +211,210 @@ export const CONVERSATION_SCRIPT: ConversationStep[] = [
     awaitsCompletion: true,
     isThinkingMessage: true,
   },
+  // Step 10
   {
     speaker: UserType.AGENT,
-    text: (
-        <div>
-            <p>Results:</p>
-            <ul className="list-none ml-2 mt-1 space-y-1">
-                <li><span className="font-semibold">4</span> internal</li>
-                <li><span className="font-semibold">5</span> semantic</li>
-                <li><span className="font-semibold">3</span> image similarity</li>
-                <li><span className="font-semibold">6</span> marketplaces</li>
-            </ul>
-            <p className="mt-2">That’s 14 unique suppliers. After applying constraints, we’re left with 8 qualified suppliers.</p>
-            <p className="mt-2">You can select which ones you’d like to shortlist from the list shown on the left, then confirm.</p>
-        </div>
-    ),
+    text: 'Found 5 qualified suppliers (2 Walmart Suppliers, 1 Seller, 2 External). Select from the list on the left and confirm your shortlist.',
     options: ["Confirm Shortlist"],
     thinkingTime: 1800,
     contextView: ContextView.SUPPLIER_SHORTLIST
   },
+  // Step 11
   {
     speaker: UserType.AGENT,
     text: "Done ✅. Selected suppliers have been shortlisted.",
     thinkingTime: 1000,
     autoContinue: true,
   },
-  // Step 4
+  // Step 12
   {
     speaker: UserType.AGENT,
-    text: "Some of the selected suppliers are already onboarded, while others are new. Want me to send onboarding invites to the new ones?",
+    text: "Some of the selected suppliers are already onboarded, while others are new. Want me to send onboarding invites?",
     options: ["Yes, send them."],
     thinkingTime: 800,
     contextView: ContextView.SUPPLIER_DASHBOARD
   },
+  // Step 13: Start sending invites
   {
     speaker: UserType.AGENT,
-    text: "Done ✅. Invites sent to the new suppliers.",
-    thinkingTime: 2000,
-    autoContinue: true,
-  },
-  {
-    speaker: UserType.AGENT,
-    text: (
-        <div>
-            <p>Okay, I’ll include the default onboarding questions automatically (company profile, contacts), and also your custom ones. Which areas should I add for the new suppliers?</p>
-            <p className="text-sm text-slate-500 mt-1">(Examples: safety, materials, capacity, quality, logistics, packaging, customization, pricing).</p>
-        </div>
-    ),
-    options: [
-        "For B: safety, materials, capacity, packaging, pricing. For C: safety, materials, quality, logistics.",
-        "No, just send the defaults."
-    ],
-    thinkingTime: 1600,
-  },
-  // Step 5
-  {
-    speaker: UserType.AGENT,
-    text: "Okay, I'm waiting for the suppliers to respond now. This might take a moment.",
+    text: "Okay, I'm sending the invites now. I'll update you as they become ready for the agreement phase.",
     thinkingTime: 1000,
-    waitingTime: 2500,
     autoContinue: true,
   },
+  // Step 14: This is a special step that triggers the simulation in App.tsx
+  {
+    speaker: UserType.AGENT,
+    text: null,
+    customAction: 'SIMULATE_ONBOARDING',
+    autoContinue: false, // The simulation will advance the step when done
+  },
+  // Step 15: Conclude onboarding and ask next question
+  {
+    speaker: UserType.AGENT,
+    text: "The suppliers are ready for the next step. Would you like to ask some vetting questions?",
+    options: ["Yes, ask some vetting questions."],
+    thinkingTime: 1000,
+  },
+  // Step 16
+  {
+    speaker: UserType.AGENT,
+    text: <PreparingQuestionsAnimation />,
+    thinkingTime: 500,
+    autoContinue: false,
+    awaitsCompletion: true,
+    isThinkingMessage: true,
+  },
+  // Step 17
   {
     speaker: UserType.AGENT,
     text: (
         <div>
-            <p>Responses are starting to come in:</p>
-            <ul className="list-disc list-inside ml-2 mt-1 space-y-1">
-                <li><span className="font-semibold">Maitri →</span> onboarded, 30k/month, $8.20/unit, compliance verified.</li>
-                <li><span className="font-semibold">Nestle →</span> ASTM/EN71 claimed, ABS lead/phthalate-free, 20k/month, recyclable packaging, $7.90/unit.</li>
-                <li><span className="font-semibold">Cadbury →</span> EN71 provided, ABS lead-free (phthalate pending), ISO 9001, SMETA, FOB Ningbo (18–22 days), price not yet given.</li>
+            <p>I've prepared a few standard follow-up questions based on the missing information. Should I send these?</p>
+            <ul className="list-disc list-inside ml-2 mt-2 bg-slate-50 p-3 rounded-lg border border-slate-200 space-y-1">
+                <li>Pricing for 250,000 units + volume discounts?</li>
+                <li>Quality control & certifications?</li>
+                <li>Sustainability practices?</li>
+                <li>Ethics: labor, wages, safety?</li>
             </ul>
         </div>
     ),
-    options: ["Draft follow-up questions.", "Review data now."],
-    thinkingTime: 1500,
+    options: ["Yes, send them.", "Draft my own instead."],
+    thinkingTime: 1000,
   },
+  // Step 18
+  {
+      speaker: UserType.AGENT,
+      text: "Okay, sending the questions now.",
+      thinkingTime: 800,
+      autoContinue: true,
+  },
+  // Step 19
+  {
+      speaker: UserType.AGENT,
+      text: null, // This will just show the waiting indicator
+      thinkingTime: 200,
+      waitingTime: 3000,
+      autoContinue: true,
+  },
+  // Step 20
+  {
+      speaker: UserType.AGENT,
+      text: (
+          <div>
+              <p>We have got the responses:</p>
+              <ul className="list-disc list-inside ml-2 mt-1 space-y-1">
+                  <li><span className="font-semibold">Gizmo Gurus →</span> Pricing at 5k units is $7.50/unit. QC docs available. Uses recycled ABS. SMETA audited.</li>
+                  <li><span className="font-semibold">Brainy Builder Toys Pvt. Ltds →</span> Pricing at 250,000 units is $5/unit. QC docs available. Confirms phthalate-free. ISO 14001 certified. BSCI audited.</li>
+              </ul>
+          </div>
+      ),
+      autoContinue: false,
+      thinkingTime: 500,
+      options: ["Ask more", "Show comparison"],
+  },
+  // Step 21
   {
     speaker: UserType.AGENT,
-    text: "Great. Please type your question for a specific supplier (e.g., 'To Cadbury: Do you support customized PMS, costs?').",
+    text: "Great. Please type your question for a specific supplier (e.g., 'To Brainy Builder Toys Pvt. Ltds: Do you support customized PMS, costs?').",
     thinkingTime: 800,
   },
+  // Step 22
   {
     speaker: UserType.AGENT,
-    text: "Cadbury confirms PMS customization, no added cost, MOQ unchanged.",
-    options: ["Ask more", "Show the comparison."],
+    text: "Brainy Builder Toys Pvt. Ltds confirms PMS customization, no added cost, MOQ unchanged.",
+    options: ["Show the comparison."],
     thinkingTime: 1200,
   },
+  // Step 23
   {
     speaker: UserType.AGENT,
-    text: "Profiles updated. Here is the consolidated comparison.",
+    text: "Supplier profiles have been updated.",
     thinkingTime: 2000,
     contextView: ContextView.SUPPLIER_COMPARISON,
     autoContinue: true,
   },
-  // Step 6
+  // Step 24 (Evaluation)
   {
     speaker: UserType.AGENT,
     text: (
         <div>
-            <p>Here’s my evaluation:</p>
+            <p>Here is the consolidated comparison :</p>
             <ul className="list-disc list-inside ml-2 mt-1 space-y-1">
-                <li><span className="font-semibold">Maitri — 84/100:</span> Strong compliance, high capacity, predictable. Weakness: higher price.</li>
-                <li><span className="font-semibold">Nestle — 81/100:</span> Best pricing, &lt;1% defect, recyclable packaging, PMS customization. Weakness: missing phthalate cert.</li>
-                <li><span className="font-semibold">Cadbury — 77/100:</span> Good audits/logistics, ethical. Weakness: incomplete compliance, no price yet.</li>
+                <li><span className="font-semibold">ToyCrafters Inc. — 92/100:</span> Strong compliance, high capacity, predictable. Weakness: higher price.</li>
+                <li><span className="font-semibold">Brainy Builder Toys Pvt. Ltds — 95/100:</span> Good price, verified compliance, customization.</li>
+                <li><span className="font-semibold">Gizmo Gurus — (N/A):</span> External supplier, best pricing, but compliance is only claimed, not verified.</li>
             </ul>
+            <p className="mt-2">Do you want to send an agreement to the selected supplier?</p>
         </div>
     ),
-    options: ["Proceed with A, keep B as backup."],
     thinkingTime: 1400,
+    autoContinue: false,
+    options: ["Yes, send agreement"],
+  },
+  // Agreement Flow
+  {
+    speaker: UserType.AGENT,
+    text: <SendingAgreementAnimation />,
+    thinkingTime: 1000,
+    isThinkingMessage: true,
+    awaitsCompletion: true,
   },
   {
     speaker: UserType.AGENT,
-    text: "Noted ✅. Locking A as primary, flagging B as conditional. Preparing PO draft…",
-    thinkingTime: 2000,
+    text: "Great, the agreement has been sent. Now waiting for the supplier to review and accept.",
+    waitingTime: 4000,
+    autoContinue: true,
+    customAction: 'AGREEMENT_ACCEPTED'
+  },
+  {
+    speaker: UserType.AGENT,
+    text: null,
+    dynamicText: 'agreementAccepted',
+    thinkingTime: 1000,
     autoContinue: true,
   },
-  // Step 7
+  // RFQ Flow
   {
     speaker: UserType.AGENT,
-    text: (
-        <div>
-            <p>Draft PO for Maitri:</p>
-            <ul className="list-none ml-2 mt-1 space-y-1">
-                <li><span className="font-semibold w-28 inline-block">Product:</span> STEM Educational Toy Kit</li>
-                <li><span className="font-semibold w-28 inline-block">Qty:</span> 1,500 units</li>
-                <li><span className="font-semibold w-28 inline-block">Price:</span> $8.20/unit</li>
-                <li><span className="font-semibold w-28 inline-block">Terms:</span> Net-30, FOB</li>
-                <li><span className="font-semibold w-28 inline-block">Compliance:</span> ASTM/EN71/CPSIA</li>
-                <li><span className="font-semibold w-28 inline-block">Lead Time:</span> 21–28 days</li>
-            </ul>
-        </div>
-    ),
-    options: ["Raise it.", "Revise it.", "Wait for B's documents."],
-    thinkingTime: 1500,
-    contextView: ContextView.PO_SUMMARY
+    text: null,
+    dynamicText: 'rfqFormHeader',
+    thinkingTime: 1200,
+    contextView: ContextView.RFQ_FORM,
+    options: ["Send RFQ"],
   },
   {
     speaker: UserType.AGENT,
-    text: "✅ Purchase Order created successfully.",
-    thinkingTime: 1200,
+    text: <SendingRFQAnimation />,
+    thinkingTime: 1000,
+    isThinkingMessage: true,
+    awaitsCompletion: true,
+  },
+  {
+    speaker: UserType.AGENT,
+    text: "RFQ sent. Now waiting for supplier responses.",
+    thinkingTime: 500,
+    waitingTime: 4000,
+    autoContinue: true,
+  },
+  {
+    speaker: UserType.SUPPLIER,
+    text: "I have filled the RFQ.",
+    thinkingTime: 1500,
+    autoContinue: true,
+    customAction: 'RFQ_RESPONSE_RECEIVED',
+  },
+  {
+    speaker: UserType.AGENT,
+    text: null,
+    dynamicText: 'rfqResponseReceived',
+    thinkingTime: 1500,
+    autoContinue: true,
+  },
+  {
+    speaker: UserType.AGENT,
+    text: "Based on their positive response, I have prepared the award for you to review.",
     options: ["Create Award"],
+    thinkingTime: 1200,
   },
   // START AWARD FLOW
   {
@@ -345,10 +462,10 @@ export const CONVERSATION_SCRIPT: ConversationStep[] = [
   },
   {
       speaker: UserType.AGENT,
-      text: "Finally, let’s add the item lines. You can paste them in CSV format (UPC, Item#, Description, Qty, DC).",
+      text: "Finally, let’s add the item lines. You can paste them in CSV format (UPC, Item#, Description, Qty, DC, Price).",
       thinkingTime: 800,
       formSection: 'items',
-      options: ["8829103,1102,Vitamin D3 500ct,10000,DC6092\n8829104,1103,Vitamin C 1000mg,15000,DC6092"],
+      options: ["8829103,1102,Vitamin D3 500ct,10000,DC6092,5.50\n8829104,1103,Vitamin C 1000mg,15000,DC6092,4.25"],
   },
   {
       speaker: UserType.AGENT,
@@ -386,17 +503,46 @@ export const CONVERSATION_SCRIPT: ConversationStep[] = [
   },
   {
     speaker: UserType.AGENT,
-    text: (
-      <div>
-        <p className="font-semibold text-slate-600">[Message to Supplier via Collab]</p>
-        <p>Congratulations! Your items have been selected for the HealthPlus Annual Award. The enclosed document contains quantities, costs, and projected store counts. Please review and confirm acceptance by EOD tomorrow.</p>
-      </div>
-    ),
+    text: null,
+    dynamicText: 'awardCongrats',
     thinkingTime: 1500,
     contextView: ContextView.AWARD_SUPPLIER_VIEW,
     simulateSupplierResponse: true,
+    waitingTime: 1000, // Small delay before waiting indicator
   },
-  // START REVIEW AWARD FLOW
+  // START PO FLOW
+  {
+    speaker: UserType.AGENT,
+    text: (
+      <div>
+        <p>Supplier has accepted the award.</p>
+        <p className="mt-2">Shall we proceed to raise a Purchase Order?</p>
+      </div>
+    ),
+    options: ["Yes, raise PO"],
+    thinkingTime: 1000,
+    contextView: ContextView.AWARD_FINAL_STATUS,
+    customAction: 'AWARD_ACCEPTED_PROCEED_TO_PO'
+  },
+  {
+      speaker: UserType.AGENT,
+      text: "Excellent. I've drafted a Purchase Order based on the award details. Please review it on the left.",
+      thinkingTime: 1500,
+      contextView: ContextView.PO_SUMMARY,
+      options: ["Confirm and Create PO"],
+  },
+  {
+      speaker: UserType.AGENT,
+      text: "Purchase Order sent to Brainy Builder Toys Pvt. Ltds. You'll be notified upon their confirmation.",
+      thinkingTime: 1000,
+      autoContinue: true,
+  },
+   {
+      speaker: UserType.AGENT,
+      text: "This completes the sourcing event. Is there anything else I can help you with today?",
+      options: ["Return to Dashboard"],
+      thinkingTime: 1000,
+  },
   {
     speaker: UserType.AGENT,
     text: null, // This step is now silent and just for navigation

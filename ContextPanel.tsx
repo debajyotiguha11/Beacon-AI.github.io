@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { ContextView, AwardDetails } from '../types';
 import { QUALIFIED_SUPPLIERS } from '../constants';
@@ -10,7 +9,6 @@ import { FinalIntakeForm } from '../features/intake/components/views/FinalIntake
 import { SupplierShortlist } from './context_views/SupplierShortlist';
 import { SupplierDashboard } from './context_views/SupplierDashboard';
 import { SupplierComparison } from './context_views/SupplierComparison';
-// FIX: Import the missing RFQForm component.
 import { RFQForm } from './context_views/RFQForm';
 import { POSummary } from './context_views/POSummary';
 import { AwardCreationForm } from '../features/award/components/views/AwardCreationForm';
@@ -20,7 +18,6 @@ import { AwardSupplierView } from '../features/award/components/views/AwardSuppl
 import { AwardFinalStatus } from '../features/award/components/views/AwardFinalStatus';
 import { AwardFlowProgressBar } from '../features/award/components/views/AwardFlowProgressBar';
 import { AwardSendingView } from '../features/award/components/views/AwardSendingView';
-import { IntakeFlowProgressBar } from '../features/intake/components/views/IntakeFlowProgressBar';
 
 
 interface ContextPanelProps {
@@ -37,13 +34,6 @@ interface ContextPanelProps {
   isAgentThinking?: boolean;
   onReturnToDashboard: () => void;
   isReviewFlow?: boolean;
-  isRfqSent?: boolean;
-  isVettingStarted?: boolean;
-  rfqSupplier: string | null;
-  onSelectRfqSupplier: (supplierName: string) => void;
-  isAgreementSent?: boolean;
-  isRfqResponseReceived?: boolean;
-  isPoSent?: boolean;
 }
 
 const viewMap: Record<ContextView, React.ComponentType<any>> = {
@@ -53,7 +43,6 @@ const viewMap: Record<ContextView, React.ComponentType<any>> = {
   [ContextView.SUPPLIER_SHORTLIST]: SupplierShortlist,
   [ContextView.SUPPLIER_DASHBOARD]: SupplierDashboard,
   [ContextView.SUPPLIER_COMPARISON]: SupplierComparison,
-  // FIX: Add the RFQForm component to the viewMap to satisfy the Record type.
   [ContextView.RFQ_FORM]: RFQForm,
   [ContextView.PO_SUMMARY]: POSummary,
   [ContextView.AWARD_CREATION]: AwardCreationForm,
@@ -99,33 +88,16 @@ export const ContextPanel: React.FC<ContextPanelProps> = ({
   isAgentThinking,
   onReturnToDashboard,
   isReviewFlow,
-  isRfqSent,
-  isVettingStarted,
-  rfqSupplier,
-  onSelectRfqSupplier,
-  isAgreementSent,
-  isRfqResponseReceived,
-  isPoSent,
 }) => {
   const CurrentView = viewMap[view] || InitialView;
 
-  const showAwardProgressBar = [
+  const showProgressBar = [
     ContextView.AWARD_CREATION,
     ContextView.AWARD_SUMMARY,
     ContextView.AWARD_PDF_GENERATION,
     ContextView.AWARD_SENDING,
     ContextView.AWARD_SUPPLIER_VIEW,
     ContextView.AWARD_FINAL_STATUS,
-    ContextView.PO_SUMMARY,
-  ].includes(view);
-
-  const showIntakeProgressBar = [
-    ContextView.DRAFT_INTAKE_FORM,
-    ContextView.FINAL_INTAKE_FORM,
-    ContextView.SUPPLIER_SHORTLIST,
-    ContextView.SUPPLIER_DASHBOARD,
-    ContextView.SUPPLIER_COMPARISON,
-    ContextView.RFQ_FORM,
   ].includes(view);
 
   // If we are in the review flow and the view is set for creation, it means we are in the data gathering phase.
@@ -135,7 +107,7 @@ export const ContextPanel: React.FC<ContextPanelProps> = ({
   if (isReviewLoading) {
       return (
           <div className="h-full flex flex-col">
-              <AwardFlowProgressBar currentView={view} supplierResponse={supplierResponse} isPoSent={isPoSent} />
+              <AwardFlowProgressBar currentView={view} supplierResponse={supplierResponse} />
               <div className="flex-grow overflow-y-auto">
                   <AwardGatheringLoader />
               </div>
@@ -156,12 +128,6 @@ export const ContextPanel: React.FC<ContextPanelProps> = ({
     viewProps.supplierStatuses = supplierStatuses;
   } else if (view === ContextView.SUPPLIER_COMPARISON) {
     viewProps.shortlistedSuppliers = selectedSuppliers;
-    viewProps.rfqSupplier = rfqSupplier;
-    viewProps.onSelectRfqSupplier = onSelectRfqSupplier;
-    viewProps.isAgreementSent = isAgreementSent;
-  } else if (view === ContextView.RFQ_FORM) {
-      viewProps.supplierName = rfqSupplier;
-      viewProps.isResponseReceived = isRfqResponseReceived;
   } else if (view === ContextView.AWARD_CREATION) {
     viewProps.awardDetails = awardDetails;
     viewProps.onDetailsChange = onAwardDetailsChange;
@@ -172,12 +138,8 @@ export const ContextPanel: React.FC<ContextPanelProps> = ({
     viewProps.awardDetails = awardDetails;
   } else if (view === ContextView.AWARD_PDF_GENERATION) {
     viewProps.isGenerating = isAgentThinking;
-    viewProps.awardDetails = awardDetails;
   } else if (view === ContextView.AWARD_SUPPLIER_VIEW) {
     viewProps.awardDetails = awardDetails;
-  } else if (view === ContextView.PO_SUMMARY) {
-    viewProps.awardDetails = awardDetails;
-    viewProps.isPoSent = isPoSent;
   } else if (view === ContextView.AWARD_FINAL_STATUS) {
     viewProps.supplierResponse = supplierResponse;
     viewProps.onReturnToDashboard = onReturnToDashboard;
@@ -185,8 +147,7 @@ export const ContextPanel: React.FC<ContextPanelProps> = ({
 
   return (
     <div className="h-full flex flex-col">
-      {showAwardProgressBar && <AwardFlowProgressBar currentView={view} supplierResponse={supplierResponse} isPoSent={isPoSent} />}
-      {showIntakeProgressBar && <IntakeFlowProgressBar currentView={view} isRfqSent={isRfqSent} isVettingStarted={isVettingStarted} />}
+      {showProgressBar && <AwardFlowProgressBar currentView={view} supplierResponse={supplierResponse} />}
       <div className="flex-grow overflow-y-auto">
         <CurrentView {...viewProps} />
       </div>

@@ -1,9 +1,12 @@
+
 import React from 'react';
 import type { AwardDetails } from './features/award/awardTypes';
 
 export enum UserType {
   AGENT = 'AGENT',
   USER = 'USER',
+  AMBER = 'AMBER',
+  SUPPLIER = 'SUPPLIER',
 }
 
 export interface Message {
@@ -20,6 +23,7 @@ export enum ContextView {
   SUPPLIER_SHORTLIST = 'SUPPLIER_SHORTLIST',
   SUPPLIER_DASHBOARD = 'SUPPLIER_DASHBOARD',
   SUPPLIER_COMPARISON = 'SUPPLIER_COMPARISON',
+  RFQ_FORM = 'RFQ_FORM',
   PO_SUMMARY = 'PO_SUMMARY',
   AWARD_CREATION = 'AWARD_CREATION',
   AWARD_SUMMARY = 'AWARD_SUMMARY',
@@ -49,7 +53,9 @@ export interface ConversationStep {
   autoContinue?: boolean;
   isThinkingMessage?: boolean;
   awaitsCompletion?: boolean;
-  customAction?: 'START_REVIEW_FLOW';
+  customAction?: 'START_REVIEW_FLOW' | 'AWARD_ACCEPTED_PROCEED_TO_PO' | 'AGREEMENT_ACCEPTED' | 'RFQ_RESPONSE_RECEIVED' | 'SIMULATE_ONBOARDING';
   formSection?: 'initial' | 'hierarchy' | 'terms' | 'clauses' | 'items';
   simulateSupplierResponse?: boolean;
+  updateSupplierStatuses?: { supplierName: string; newStatus: string }[];
+  dynamicText?: 'awardCongrats' | 'rfqFormHeader' | 'agreementAccepted' | 'rfqResponseReceived';
 }
